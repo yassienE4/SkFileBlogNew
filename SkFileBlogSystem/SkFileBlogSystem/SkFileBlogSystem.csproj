@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <Folder Include="content\categories\" />
+      <Folder Include="content\config\" />
+      <Folder Include="content\media\" />
+      <Folder Include="content\posts\" />
+      <Folder Include="content\tags\" />
+      <Folder Include="content\users\" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Markdig" Version="0.41.3" />
+      <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.0-preview.5.25277.114" />
+      <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="8.12.1" />
+      <PackageReference Include="SixLabors.ImageSharp" Version="3.1.10" />
+      <PackageReference Include="Swashbuckle.AspNetCore" Version="9.0.1" />
+      <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.12.1" />
+    </ItemGroup>
+
+</Project>

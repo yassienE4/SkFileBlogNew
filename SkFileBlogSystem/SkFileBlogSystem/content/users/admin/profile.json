@@ -4,7 +4,7 @@
   "Email": "admin@admin.com",
   "PasswordHash": "PK1SSxUoOXeAhN5XuAYs10/AaC2lJRCw5amr\u002B5LjKyc=",
   "DisplayName": "",
-  "Role": 2,
+  "Role": "User",
   "CreatedDate": "2025-07-01T02:46:22.381191Z",
   "LastLoginDate": "0001-01-01T00:00:00",
   "IsActive": true

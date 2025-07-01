@@ -87,6 +87,11 @@ export function Navbar() {
                     </span>
                   )}
                 </div>
+                <Link href="/my-posts">
+                  <Button variant="ghost" size="sm">
+                    My Posts
+                  </Button>
+                </Link>
                 <Link href="/profile">
                   <Button variant="ghost" size="sm">
                     Profile

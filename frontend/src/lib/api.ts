@@ -1,4 +1,4 @@
-import { BlogPostsResponse, TagsResponse, CategoriesResponse, BlogPost, CreatePostRequest, CreatePostResponse } from '@/types/blog';
+import { BlogPostsResponse, TagsResponse, CategoriesResponse, BlogPost, CreatePostRequest, CreatePostResponse, UpdatePostRequest } from '@/types/blog';
 import { RegisterRequest, RegisterResponse, LoginRequest, LoginResponse } from '@/types/auth';
 
 const BASE_URL = 'http://localhost:5141/api';
@@ -95,6 +95,40 @@ export async function createPost(data: CreatePostRequest, authToken: string): Pr
   }
 
   return response.json();
+}
+
+// Post update API
+export async function updatePost(slug: string, data: UpdatePostRequest, authToken: string): Promise<BlogPost> {
+  const response = await fetch(`${BASE_URL}/posts/${slug}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${authToken}`,
+    },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.text();
+    throw new Error(`Failed to update post: ${errorData}`);
+  }
+
+  return response.json();
+}
+
+// Post deletion API
+export async function deletePost(slug: string, authToken: string): Promise<void> {
+  const response = await fetch(`${BASE_URL}/posts/${slug}`, {
+    method: 'DELETE',
+    headers: {
+      'Authorization': `Bearer ${authToken}`,
+    },
+  });
+
+  if (!response.ok) {
+    const errorData = await response.text();
+    throw new Error(`Failed to delete post: ${errorData}`);
+  }
 }
 
 // Authentication API functions

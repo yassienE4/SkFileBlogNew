@@ -96,7 +96,27 @@ export default async function ProfilePage() {
               <CardTitle>Quick Actions</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <Link 
+                  href="/my-posts" 
+                  className="p-4 border rounded-lg hover:bg-accent transition-colors"
+                >
+                  <h3 className="font-medium mb-2">My Posts</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Manage your blog posts
+                  </p>
+                </Link>
+                
+                <Link 
+                  href="/create-post" 
+                  className="p-4 border rounded-lg hover:bg-accent transition-colors"
+                >
+                  <h3 className="font-medium mb-2">Create Post</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Write a new blog post
+                  </p>
+                </Link>
+                
                 <Link 
                   href="/blog" 
                   className="p-4 border rounded-lg hover:bg-accent transition-colors"
@@ -114,16 +134,6 @@ export default async function ProfilePage() {
                   <h3 className="font-medium mb-2">Browse Tags</h3>
                   <p className="text-sm text-muted-foreground">
                     Find posts by topics
-                  </p>
-                </Link>
-                
-                <Link 
-                  href="/about" 
-                  className="p-4 border rounded-lg hover:bg-accent transition-colors"
-                >
-                  <h3 className="font-medium mb-2">About</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Learn more about us
                   </p>
                 </Link>
               </div>

@@ -1,6 +1,8 @@
 import { fetchPostBySlug } from '@/lib/api';
+import { getCurrentUser } from '@/lib/auth-server';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { PostActions } from '@/components/post-actions';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
@@ -14,7 +16,12 @@ export default async function PostPage({ params }: PostPageProps) {
   const { slug } = await params;
   
   try {
-    const post = await fetchPostBySlug(slug);
+    const [post, currentUser] = await Promise.all([
+      fetchPostBySlug(slug),
+      getCurrentUser()
+    ]);
+
+    const isOwner = currentUser && post.authorId === currentUser.id;
 
     const formatDate = (dateString: string) => {
       const date = new Date(dateString);
@@ -94,6 +101,9 @@ export default async function PostPage({ params }: PostPageProps) {
                 <span>{Math.ceil(post.content.replace(/\s+/g, ' ').split(' ').length / 200)} min read</span>
               </div>
             </header>
+
+            {/* Post Actions (only shown to post owner) */}
+            <PostActions slug={post.slug} isOwner={!!isOwner} />
 
             {/* Content */}
             <div className="prose prose-lg dark:prose-invert max-w-none">

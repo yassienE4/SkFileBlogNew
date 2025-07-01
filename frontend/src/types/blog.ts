@@ -24,6 +24,18 @@ export interface CreatePostRequest {
   tags: string[];
   status: number; // 0 = Draft, 1 = Published, 2 = Archived
   customUrl?: string;
+  scheduledDate?: string; // Add support for scheduling
+}
+
+export interface UpdatePostRequest {
+  title: string;
+  content: string;
+  description: string;
+  categories: string[];
+  tags: string[];
+  status: number;
+  customUrl?: string;
+  scheduledDate?: string;
 }
 
 export interface CreatePostResponse extends BlogPost {}

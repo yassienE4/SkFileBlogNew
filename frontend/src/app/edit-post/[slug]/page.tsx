@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { createPost } from '@/lib/api';
+import { updatePost, fetchPostBySlug } from '@/lib/api';
 import { getCurrentUserClient, getAuthTokenClient } from '@/lib/auth-client';
-import { CreatePostRequest } from '@/types/blog';
+import { UpdatePostRequest, BlogPost } from '@/types/blog';
 import { LoginUser } from '@/types/auth';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -15,9 +15,16 @@ import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
 import ProtectedRoute from '@/components/protected-route';
 
-function CreatePostForm() {
+interface EditPostPageProps {
+  params: Promise<{
+    slug: string;
+  }>;
+}
+
+function EditPostForm({ slug }: { slug: string }) {
   const router = useRouter();
-  const [formData, setFormData] = useState<CreatePostRequest>({
+  const [post, setPost] = useState<BlogPost | null>(null);
+  const [formData, setFormData] = useState<UpdatePostRequest>({
     title: '',
     content: '',
     description: '',
@@ -29,7 +36,8 @@ function CreatePostForm() {
   });
   const [tagInput, setTagInput] = useState('');
   const [categoryInput, setCategoryInput] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [user, setUser] = useState<LoginUser | null>(null);
 
@@ -40,7 +48,37 @@ function CreatePostForm() {
       return;
     }
     setUser(currentUser);
-  }, [router]);
+    loadPost();
+  }, [router, slug]);
+
+  const loadPost = async () => {
+    try {
+      const postData = await fetchPostBySlug(slug);
+      const currentUser = getCurrentUserClient();
+      
+      // Check if user owns this post
+      if (!currentUser || postData.authorId !== currentUser.id) {
+        router.push('/blog');
+        return;
+      }
+
+      setPost(postData);
+      setFormData({
+        title: postData.title,
+        content: postData.content,
+        description: postData.description,
+        categories: postData.categories,
+        tags: postData.tags,
+        status: postData.status,
+        customUrl: postData.customUrl || '',
+        scheduledDate: postData.scheduledDate || '',
+      });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load post');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -104,37 +142,44 @@ function CreatePostForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
+    setIsSaving(true);
     setError(null);
 
     try {
-      // Get auth token from cookies
       const authToken = getAuthTokenClient();
       
       if (!authToken) {
         throw new Error('Authentication token not found. Please log in again.');
       }
       
-      const createData = { ...formData };
-      if (createData.scheduledDate === '') {
-        createData.scheduledDate = undefined;
+      const updateData = { ...formData };
+      if (updateData.scheduledDate === '') {
+        updateData.scheduledDate = undefined;
       }
       
-      const response = await createPost(createData, authToken);
+      const response = await updatePost(slug, updateData, authToken);
       
-      // Redirect to the newly created post
+      // Redirect to the updated post
       router.push(`/blog/${response.slug}`);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to create post');
+      setError(err instanceof Error ? err.message : 'Failed to update post');
     } finally {
-      setIsLoading(false);
+      setIsSaving(false);
     }
   };
 
-  if (!user) {
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <div>Loading...</div>
+        <div>Loading post...</div>
+      </div>
+    );
+  }
+
+  if (!user || !post) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div>Unauthorized or post not found</div>
       </div>
     );
   }
@@ -143,9 +188,9 @@ function CreatePostForm() {
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold tracking-tight mb-2">Create New Post</h1>
+          <h1 className="text-3xl font-bold tracking-tight mb-2">Edit Post</h1>
           <p className="text-muted-foreground">
-            Share your thoughts and ideas with the community
+            Update your post details and content
           </p>
         </div>
 
@@ -172,7 +217,7 @@ function CreatePostForm() {
                   value={formData.title}
                   onChange={handleInputChange}
                   required
-                  disabled={isLoading}
+                  disabled={isSaving}
                 />
               </div>
 
@@ -186,7 +231,7 @@ function CreatePostForm() {
                   value={formData.description}
                   onChange={handleInputChange}
                   required
-                  disabled={isLoading}
+                  disabled={isSaving}
                   rows={3}
                 />
               </div>
@@ -201,7 +246,7 @@ function CreatePostForm() {
                   value={formData.content}
                   onChange={handleInputChange}
                   required
-                  disabled={isLoading}
+                  disabled={isSaving}
                   rows={12}
                   className="resize-y"
                 />
@@ -218,13 +263,13 @@ function CreatePostForm() {
                     value={categoryInput}
                     onChange={(e) => setCategoryInput(e.target.value)}
                     onKeyPress={handleCategoryInputKeyPress}
-                    disabled={isLoading}
+                    disabled={isSaving}
                   />
                   <Button
                     type="button"
                     variant="outline"
                     onClick={addCategory}
-                    disabled={isLoading || !categoryInput.trim()}
+                    disabled={isSaving || !categoryInput.trim()}
                   >
                     Add
                   </Button>
@@ -256,13 +301,13 @@ function CreatePostForm() {
                     value={tagInput}
                     onChange={(e) => setTagInput(e.target.value)}
                     onKeyPress={handleTagInputKeyPress}
-                    disabled={isLoading}
+                    disabled={isSaving}
                   />
                   <Button
                     type="button"
                     variant="outline"
                     onClick={addTag}
-                    disabled={isLoading || !tagInput.trim()}
+                    disabled={isSaving || !tagInput.trim()}
                   >
                     Add
                   </Button>
@@ -293,7 +338,7 @@ function CreatePostForm() {
                   placeholder="custom-post-url"
                   value={formData.customUrl}
                   onChange={handleInputChange}
-                  disabled={isLoading}
+                  disabled={isSaving}
                 />
               </div>
 
@@ -306,7 +351,7 @@ function CreatePostForm() {
                   type="datetime-local"
                   value={formData.scheduledDate}
                   onChange={handleInputChange}
-                  disabled={isLoading}
+                  disabled={isSaving}
                 />
                 <p className="text-sm text-muted-foreground">
                   Leave empty to publish immediately when status is set to "Published"
@@ -319,7 +364,7 @@ function CreatePostForm() {
                   id="status"
                   checked={formData.status === 1}
                   onCheckedChange={handleSwitchChange}
-                  disabled={isLoading}
+                  disabled={isSaving}
                 />
                 <Label htmlFor="status">
                   Publish immediately
@@ -332,15 +377,15 @@ function CreatePostForm() {
                   type="button"
                   variant="outline"
                   onClick={() => router.back()}
-                  disabled={isLoading}
+                  disabled={isSaving}
                 >
                   Cancel
                 </Button>
                 <Button
                   type="submit"
-                  disabled={isLoading}
+                  disabled={isSaving}
                 >
-                  {isLoading ? 'Creating...' : 'Create Post'}
+                  {isSaving ? 'Updating...' : 'Update Post'}
                 </Button>
               </div>
             </form>
@@ -351,10 +396,12 @@ function CreatePostForm() {
   );
 }
 
-export default function CreatePostPage() {
+export default async function EditPostPage({ params }: EditPostPageProps) {
+  const { slug } = await params;
+  
   return (
     <ProtectedRoute>
-      <CreatePostForm />
+      <EditPostForm slug={slug} />
     </ProtectedRoute>
   );
 }

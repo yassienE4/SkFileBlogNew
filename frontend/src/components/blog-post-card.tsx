@@ -1,13 +1,18 @@
 import { BlogPost } from '@/types/blog';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Edit, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 
 interface BlogPostCardProps {
   post: BlogPost;
+  showActions?: boolean;
+  currentUserId?: string;
+  onDelete?: (slug: string) => void;
 }
 
-export function BlogPostCard({ post }: BlogPostCardProps) {
+export function BlogPostCard({ post, showActions = false, currentUserId, onDelete }: BlogPostCardProps) {
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', {
@@ -26,8 +31,41 @@ export function BlogPostCard({ post }: BlogPostCardProps) {
     return html.replace(/<[^>]*>/g, '');
   };
 
+  const isOwner = currentUserId && post.authorId === currentUserId;
+
   return (
-    <Card className="h-full hover:shadow-md transition-all duration-200 group cursor-pointer">
+    <Card className="h-full hover:shadow-md transition-all duration-200 group cursor-pointer relative">
+      {/* Action buttons for post owner */}
+      {showActions && isOwner && (
+        <div className="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
+          <div className="flex gap-1">
+            <Link href={`/edit-post/${post.slug}`}>
+              <Button
+                size="sm"
+                variant="outline"
+                className="h-8 w-8 p-0 bg-background/90 backdrop-blur-sm"
+                onClick={(e) => e.preventDefault()}
+              >
+                <Edit className="h-3 w-3" />
+              </Button>
+            </Link>
+            <Button
+              size="sm"
+              variant="outline"
+              className="h-8 w-8 p-0 bg-background/90 backdrop-blur-sm text-destructive hover:text-destructive"
+              onClick={(e) => {
+                e.preventDefault();
+                if (onDelete) {
+                  onDelete(post.slug);
+                }
+              }}
+            >
+              <Trash2 className="h-3 w-3" />
+            </Button>
+          </div>
+        </div>
+      )}
+
       <Link href={`/blog/${post.slug}`} className="block h-full">
         <CardHeader className="pb-3">
           <CardTitle className="text-xl font-semibold line-clamp-2 group-hover:text-primary transition-colors">

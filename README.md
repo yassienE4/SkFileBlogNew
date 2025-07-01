@@ -1,3 +1,27 @@
+# My Notes
+
+## Building
+
+Run dotnet run or press run on your ide inside the "SkFileBlogSystem" folder to run the backend
+
+Run npm run build/dev inside "frontend" to run the frontend
+
+## FrontEnd
+Next.js Frontend with Typescript using components from Shadcn
+
+https://ui.shadcn.com/docs/components/form
+
+## Known Issues/Missing Features
+
+1. A refresh is required after login to cause the app to register the login
+2. Admin Role functionality
+3. Markdown processing (will do this before 11am)
+
+
+##
+
+
+
 # File-Based Blog System Requirements
 
 ## Overview

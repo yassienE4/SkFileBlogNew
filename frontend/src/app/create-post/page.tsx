@@ -13,6 +13,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
+import { MarkdownPreview } from '@/components/markdown-preview';
 import ProtectedRoute from '@/components/protected-route';
 
 function CreatePostForm() {
@@ -192,20 +193,11 @@ function CreatePostForm() {
               </div>
 
               {/* Content */}
-              <div className="space-y-2">
-                <Label htmlFor="content">Content *</Label>
-                <Textarea
-                  id="content"
-                  name="content"
-                  placeholder="Write your post content here..."
-                  value={formData.content}
-                  onChange={handleInputChange}
-                  required
-                  disabled={isLoading}
-                  rows={12}
-                  className="resize-y"
-                />
-              </div>
+              <MarkdownPreview
+                content={formData.content}
+                onChange={(content) => setFormData(prev => ({ ...prev, content }))}
+                showPreview={true}
+              />
 
               {/* Categories */}
               <div className="space-y-2">

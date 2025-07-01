@@ -1,4 +1,5 @@
 import { BlogPost } from '@/types/blog';
+import { markdownToPlainText } from '@/lib/markdown';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -23,8 +24,8 @@ export function BlogPostCard({ post, showActions = false, currentUserId, onDelet
   };
 
   const truncateContent = (content: string, maxLength: number = 150) => {
-    if (content.length <= maxLength) return content;
-    return content.substring(0, maxLength).trim() + '...';
+    // Use markdown-aware text extraction
+    return markdownToPlainText(content, maxLength);
   };
 
   const stripHtml = (html: string) => {

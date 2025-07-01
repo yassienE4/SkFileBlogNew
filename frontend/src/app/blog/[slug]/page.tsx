@@ -1,5 +1,6 @@
 import { fetchPostBySlug } from '@/lib/api';
 import { getCurrentUser } from '@/lib/auth-server';
+import { markdownToHtml, isMarkdown } from '@/lib/markdown';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { PostActions } from '@/components/post-actions';
@@ -34,30 +35,44 @@ export default async function PostPage({ params }: PostPageProps) {
       });
     };
 
-    const formatContent = (content: string) => {
-      // Split content by line breaks and render as paragraphs
-      // Handle both single and double line breaks
-      const paragraphs = content.split(/\n\s*\n/);
-      
-      return paragraphs.map((paragraph, index) => {
-        // Skip empty paragraphs
-        if (!paragraph.trim()) return null;
-        
-        // Handle single line breaks within paragraphs
-        const lines = paragraph.split('\n').map((line, lineIndex) => (
-          <span key={lineIndex}>
-            {line}
-            {lineIndex < paragraph.split('\n').length - 1 && <br />}
-          </span>
-        ));
-        
+    const formatContent = async (content: string) => {
+      // Check if content appears to be markdown
+      if (isMarkdown(content)) {
+        // Process as markdown
+        const htmlContent = await markdownToHtml(content);
         return (
-          <p key={index} className="mb-6 leading-relaxed text-lg">
-            {lines}
-          </p>
+          <div 
+            className="prose prose-lg dark:prose-invert max-w-none blog-content"
+            dangerouslySetInnerHTML={{ __html: htmlContent }}
+          />
         );
-      }).filter(Boolean);
+      } else {
+        // Fallback to plain text formatting (existing logic)
+        const paragraphs = content.split(/\n\s*\n/);
+        
+        return paragraphs.map((paragraph, index) => {
+          // Skip empty paragraphs
+          if (!paragraph.trim()) return null;
+          
+          // Handle single line breaks within paragraphs
+          const lines = paragraph.split('\n').map((line, lineIndex) => (
+            <span key={lineIndex}>
+              {line}
+              {lineIndex < paragraph.split('\n').length - 1 && <br />}
+            </span>
+          ));
+          
+          return (
+            <p key={index} className="mb-6 leading-relaxed text-lg">
+              {lines}
+            </p>
+          );
+        }).filter(Boolean);
+      }
     };
+
+    // Process the content
+    const processedContent = await formatContent(post.content);
 
     return (
       <div className="min-h-screen bg-background">
@@ -107,9 +122,7 @@ export default async function PostPage({ params }: PostPageProps) {
 
             {/* Content */}
             <div className="prose prose-lg dark:prose-invert max-w-none">
-              <div className="text-foreground leading-relaxed space-y-6">
-                {formatContent(post.content)}
-              </div>
+              {processedContent}
             </div>
 
             {/* Tags and Categories */}

@@ -142,6 +142,9 @@
 .blog-content h1 { @apply text-3xl; }
 .blog-content h2 { @apply text-2xl; }
 .blog-content h3 { @apply text-xl; }
+.blog-content h4 { @apply text-lg; }
+.blog-content h5 { @apply text-base; }
+.blog-content h6 { @apply text-sm; }
 
 .blog-content ul,
 .blog-content ol {
@@ -153,15 +156,56 @@
 }
 
 .blog-content blockquote {
-  @apply border-l-4 border-primary pl-4 italic my-6;
+  @apply border-l-4 border-primary pl-4 italic my-6 bg-muted/30 py-2;
 }
 
 .blog-content code {
-  @apply bg-muted px-1 py-0.5 rounded text-sm;
+  @apply bg-muted px-1 py-0.5 rounded text-sm font-mono;
 }
 
 .blog-content pre {
   @apply bg-muted p-4 rounded-lg my-6 overflow-x-auto;
+}
+
+.blog-content pre code {
+  @apply bg-transparent p-0;
+}
+
+/* GitHub Flavored Markdown additions */
+.blog-content table {
+  @apply w-full border-collapse border border-border my-6;
+}
+
+.blog-content th,
+.blog-content td {
+  @apply border border-border px-4 py-2 text-left;
+}
+
+.blog-content th {
+  @apply bg-muted font-semibold;
+}
+
+.blog-content del {
+  @apply line-through opacity-70;
+}
+
+/* Task lists */
+.blog-content input[type="checkbox"] {
+  @apply mr-2;
+}
+
+.blog-content hr {
+  @apply my-8 border-border;
+}
+
+/* Links */
+.blog-content a {
+  @apply text-primary hover:underline;
+}
+
+/* Images */
+.blog-content img {
+  @apply max-w-full h-auto rounded-lg my-4;
 }
 
 /* Line clamp utilities */
@@ -170,4 +214,49 @@
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+
+/* Additional GitHub Flavored Markdown styles */
+.blog-content table {
+  @apply w-full border-collapse border border-border my-6 rounded-lg overflow-hidden;
+}
+
+.blog-content th,
+.blog-content td {
+  @apply border border-border px-4 py-2 text-left;
+}
+
+.blog-content th {
+  @apply bg-muted font-semibold;
+}
+
+.blog-content tbody tr:nth-child(even) {
+  @apply bg-muted/20;
+}
+
+.blog-content del {
+  @apply line-through opacity-70;
+}
+
+/* Task lists */
+.blog-content input[type="checkbox"] {
+  @apply mr-2 accent-primary;
+}
+
+.blog-content hr {
+  @apply my-8 border-border;
+}
+
+/* Enhanced code blocks */
+.blog-content pre code {
+  @apply bg-transparent p-0;
+}
+
+/* Strong and emphasis */
+.blog-content strong {
+  @apply font-semibold;
+}
+
+.blog-content em {
+  @apply italic;
 }

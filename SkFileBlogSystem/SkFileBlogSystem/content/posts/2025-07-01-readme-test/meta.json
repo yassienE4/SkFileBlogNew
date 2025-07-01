@@ -1,0 +1,17 @@
+{
+  "Id": "5aaf203d-920d-4742-a560-9302ac2dbe2c",
+  "Title": "readme test",
+  "Slug": "readme-test",
+  "Description": "testing markdown with a basic readme",
+  "AuthorId": "207abb17-d6dc-4223-b7e3-c05561c4ca29",
+  "AuthorName": "",
+  "PublishedDate": "2025-07-01T07:28:13.543736Z",
+  "ModifiedDate": "2025-07-01T07:28:13.543736Z",
+  "Status": 1,
+  "ScheduledDate": null,
+  "Tags": [
+    "readme"
+  ],
+  "Categories": [],
+  "CustomUrl": ""
+}

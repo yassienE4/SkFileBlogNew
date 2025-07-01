@@ -1,0 +1,9 @@
+SkFileBlogSystem/bin/
+SkFileBlogSystem/obj/
+SkFileBlogSystem/packages/
+SkFileBlogSystem/riderModule.iml
+SkFileBlogSystem/_ReSharper.Caches/
+
+
+frontend/node_modules
+frontend/.next/

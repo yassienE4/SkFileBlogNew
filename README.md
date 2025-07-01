@@ -15,7 +15,7 @@ https://ui.shadcn.com/docs/components/form
 
 1. A refresh is required after login to cause the app to register the login
 2. Admin Role functionality
-3. Markdown processing (will do this before 11am)
+3. images
 
 
 ##

@@ -1,0 +1,19 @@
+{
+  "Id": "e1720425-11f5-4b9e-8196-48e347ca5832",
+  "Title": "kofta",
+  "Slug": "kofta",
+  "Description": "",
+  "AuthorId": "4399ba16-d21a-4a37-8560-0af540ac06a3",
+  "AuthorName": "",
+  "PublishedDate": "0001-01-01T00:00:00",
+  "ModifiedDate": "2025-07-01T01:13:47.34659Z",
+  "Status": 1,
+  "ScheduledDate": null,
+  "Tags": [
+    "first-post",
+    "blogging",
+    "test"
+  ],
+  "Categories": [],
+  "CustomUrl": null
+}

@@ -1,0 +1,11 @@
+{
+  "Id": "53232025-7fca-4968-915a-11fe7347932d",
+  "Username": "johnpork",
+  "Email": "john.doe@example.com",
+  "PasswordHash": "uieStK5QnVnHbwlJjhN9i5z/rd2I9swF9mG9xUWPYvE=",
+  "DisplayName": "",
+  "Role": "User",
+  "CreatedDate": "2025-07-01T00:08:36.624306Z",
+  "LastLoginDate": "0001-01-01T00:00:00",
+  "IsActive": true
+}

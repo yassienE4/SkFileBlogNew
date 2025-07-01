@@ -1,0 +1,19 @@
+{
+  "Id": "f7be896b-491a-4bca-bbe1-cd6dd7d4787c",
+  "Title": "Yassiens first post",
+  "Slug": "yassiens-first-post",
+  "Description": "Hi my name is Yassien",
+  "AuthorId": "207abb17-d6dc-4223-b7e3-c05561c4ca29",
+  "AuthorName": "",
+  "PublishedDate": "2025-07-01T04:18:17.69291Z",
+  "ModifiedDate": "2025-07-01T04:18:17.69291Z",
+  "Status": 1,
+  "ScheduledDate": null,
+  "Tags": [
+    "love"
+  ],
+  "Categories": [
+    "tech"
+  ],
+  "CustomUrl": ""
+}

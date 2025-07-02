@@ -4,7 +4,7 @@ namespace SkFileBlogSystem.Services;
 
 public interface IUserService
 {
-    Task<User?> GetUserByEmailAsync(string email); // Add this line
+    Task<User?> GetUserByEmailAsync(string email); 
     Task<List<User>> GetAllUsersAsync();
     Task<User?> GetUserByIdAsync(string id);
     Task<User?> GetUserByUsernameAsync(string username);

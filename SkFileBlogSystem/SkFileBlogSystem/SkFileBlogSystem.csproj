@@ -13,7 +13,6 @@
       <Folder Include="content\posts\" />
       <Folder Include="content\tags\" />
       <Folder Include="content\users\" />
-      <Folder Include="Middleware\" />
     </ItemGroup>
 
     <ItemGroup>

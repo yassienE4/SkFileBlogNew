@@ -13,9 +13,8 @@ https://ui.shadcn.com/docs/components/form
 
 ## Known Issues/Missing Features
 
-1. A refresh is required after login to cause the app to register the login
-2. Admin Role functionality
-3. images
+1. Admin Role functionality
+2. images
 
 
 ##

@@ -8,9 +8,8 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
-import { Switch } from '@/components/ui/switch';
 import { Pagination } from '@/components/simple-pagination';
-import { fetchAllUsers, createUser, updateUserStatus, fetchRecentPosts, deletePost } from '@/lib/api';
+import { fetchAllUsers, createUser, fetchRecentPosts, deletePost } from '@/lib/api';
 import { getCurrentUserClient, getAuthTokenClient } from '@/lib/auth-client';
 import { User, CreateUserRequest } from '@/types/auth';
 import { BlogPost } from '@/types/blog';
@@ -118,17 +117,6 @@ function AdminPanelContent() {
       loadData(); // Reload users
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to create user');
-    }
-  };
-
-  const handleToggleUserStatus = async (userId: string, currentStatus: boolean) => {
-    if (!authToken) return;
-    
-    try {
-      await updateUserStatus(userId, !currentStatus, authToken);
-      loadData(); // Reload users
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to update user status');
     }
   };
 
@@ -292,7 +280,6 @@ function AdminPanelContent() {
                           <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Role</th>
                           <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Status</th>
                           <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Created</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Actions</th>
                         </tr>
                       </thead>
                       <tbody className="bg-card divide-y divide-border">
@@ -312,30 +299,18 @@ function AdminPanelContent() {
                                 </Badge>
                               </td>
                               <td className="px-6 py-4 whitespace-nowrap">
-                                <div className="flex items-center">
-                                  <Switch
-                                    checked={user.isActive}
-                                    onCheckedChange={() => handleToggleUserStatus(user.id, user.isActive)}
-                                    disabled={user.id === currentUser?.id} // Prevent admin from deactivating themselves
-                                  />
-                                  <span className="ml-2 text-sm text-muted-foreground">
-                                    {user.isActive ? 'Active' : 'Inactive'}
-                                  </span>
-                                </div>
+                                <Badge variant={user.isActive ? 'default' : 'secondary'}>
+                                  {user.isActive ? 'Active' : 'Inactive'}
+                                </Badge>
                               </td>
                               <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
                                 {new Date(user.createdDate).toLocaleDateString()}
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                <Button variant="outline" size="sm">
-                                  <Edit className="h-4 w-4" />
-                                </Button>
                               </td>
                             </tr>
                           ))
                         ) : (
                           <tr>
-                            <td colSpan={6} className="px-6 py-8 text-center text-muted-foreground">
+                            <td colSpan={5} className="px-6 py-8 text-center text-muted-foreground">
                               {error ? 'Failed to load users. Check console for details.' : 'No users found.'}
                             </td>
                           </tr>

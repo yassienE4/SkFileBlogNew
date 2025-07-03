@@ -24,7 +24,7 @@ function CreatePostForm() {
     description: '',
     categories: [],
     tags: [],
-    status: 0, // 0 = Draft, 1 = Published, 2 = Archived
+    status: 0, // 1 = published, 2 = scheduled
     customUrl: '',
     scheduledDate: '',
   });
@@ -50,7 +50,7 @@ function CreatePostForm() {
   };
 
   const handleSwitchChange = (checked: boolean) => {
-    setFormData(prev => ({ ...prev, status: checked ? 1 : 0 }));
+    setFormData(prev => ({ ...prev, status: checked ? 1 : 2 }));
   };
 
   const addTag = () => {

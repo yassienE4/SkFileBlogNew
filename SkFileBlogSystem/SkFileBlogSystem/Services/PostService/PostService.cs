@@ -140,7 +140,7 @@ public class PostService : IPostService
                 PublishedDate = request.Status == PostStatus.Published ? postDate : DateTime.MinValue,
                 ModifiedDate = postDate,
                 Status = request.Status,
-                ScheduledDate = request.ScheduledDate,
+                ScheduledDate = request.ScheduledDate.HasValue ? request.ScheduledDate.Value.AddHours(-3) : request.ScheduledDate,
                 Tags = request.Tags ?? new List<string>(),
                 Categories = request.Categories ?? new List<string>(),
                 CustomUrl = request.CustomUrl

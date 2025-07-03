@@ -4,7 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="6645fac4-d7da-4602-bd8c-8cd082934848" name="Changes" comment="" />
+    <list default="true" id="6645fac4-d7da-4602-bd8c-8cd082934848" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/../SkFileBlogSystem/SkFileBlogSystem/Services/PostService/PostService.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../SkFileBlogSystem/SkFileBlogSystem/Services/PostService/PostService.cs" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />

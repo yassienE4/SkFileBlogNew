@@ -388,12 +388,24 @@ function EditPostForm({ slug }: { slug: string }) {
   );
 }
 
-export default async function EditPostPage({ params }: EditPostPageProps) {
-  const { slug } = await params;
-  
+export default function EditPostPage({ params }: EditPostPageProps) {
   return (
     <ProtectedRoute>
-      <EditPostForm slug={slug} />
+      <EditPostFormWrapper params={params} />
     </ProtectedRoute>
   );
+}
+
+function EditPostFormWrapper({ params }: { params: Promise<{ slug: string }> }) {
+  const [slug, setSlug] = useState<string | null>(null);
+
+  useEffect(() => {
+    params.then(({ slug }) => setSlug(slug));
+  }, [params]);
+
+  if (!slug) {
+    return <div>Loading...</div>;
+  }
+
+  return <EditPostForm slug={slug} />;
 }

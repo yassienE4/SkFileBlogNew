@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { deletePost } from '@/lib/api';
 import { getCurrentUserClient, getAuthTokenClient } from '@/lib/auth-client';
@@ -15,6 +15,7 @@ import {
   DialogTitle 
 } from '@/components/ui/dialog';
 import Link from 'next/link';
+import { LoginUser } from '@/types/auth';
 
 interface PostActionsProps {
   slug: string;
@@ -26,7 +27,13 @@ export function PostActions({ slug, isOwner, authorId }: PostActionsProps) {
   const router = useRouter();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  const currentUser = getCurrentUserClient();
+  const [currentUser, setCurrentUser] = useState<LoginUser | null>(null);
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+    setCurrentUser(getCurrentUserClient());
+  }, []);
   
   // Check if user is admin or owner
   const canEdit = isOwner;
@@ -53,6 +60,10 @@ export function PostActions({ slug, isOwner, authorId }: PostActionsProps) {
       setDeleteDialogOpen(false);
     }
   };
+
+  if (!isClient) {
+    return null; // Don't render anything during SSR
+  }
 
   if (!canEdit && !canDelete) {
     return null;

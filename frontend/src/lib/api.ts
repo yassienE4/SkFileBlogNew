@@ -168,6 +168,7 @@ export async function login(data: LoginRequest): Promise<LoginResponse> {
 
 // User Management API functions (Admin only)
 export async function fetchAllUsers(authToken: string, page: number = 1, pageSize: number = 10): Promise<UsersResponse> {
+  console.log(`Fetching users: page=${page}, pageSize=${pageSize}`);
   const response = await fetch(`${BASE_URL}/users?page=${page}&pageSize=${pageSize}`, {
     headers: {
       'Authorization': `Bearer ${authToken}`,
@@ -177,10 +178,40 @@ export async function fetchAllUsers(authToken: string, page: number = 1, pageSiz
 
   if (!response.ok) {
     const errorText = await response.text();
+    console.error('Users API error:', response.status, errorText);
     throw new Error(errorText || 'Failed to fetch users');
   }
 
-  return response.json();
+  const data = await response.json();
+  console.log('Raw users API response:', data);
+  
+  // Check if the response is already in the expected format
+  if (data.users && typeof data.totalCount === 'number') {
+    console.log('Backend returned paginated response');
+    return data;
+  }
+  
+  // If the backend returns a simple array, wrap it in the expected format
+  const users = Array.isArray(data) ? data : [];
+  const totalCount = users.length;
+  const totalPages = Math.ceil(totalCount / pageSize);
+  
+  console.log(`Backend returned simple array with ${users.length} users`);
+  
+  // Apply client-side pagination if backend doesn't support it
+  const startIndex = (page - 1) * pageSize;
+  const pagedUsers = users.slice(startIndex, startIndex + pageSize);
+  
+  const result = {
+    users: pagedUsers,
+    totalCount: totalCount,
+    page: page,
+    pageSize: pageSize,
+    totalPages: totalPages
+  };
+  
+  console.log('Transformed response:', result);
+  return result;
 }
 
 export async function createUser(data: CreateUserRequest, authToken: string): Promise<User> {

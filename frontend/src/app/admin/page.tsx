@@ -62,15 +62,23 @@ function AdminPanelContent() {
     
     try {
       if (activeTab === 'users') {
+        console.log('Fetching users with token:', authToken ? 'Token present' : 'No token');
+        console.log('Page:', userPage, 'PageSize:', pageSize);
+        
         const usersResponse = await fetchAllUsers(authToken, userPage, pageSize);
-        setUsers(usersResponse.users);
-        setTotalUsers(usersResponse.totalCount);
+        console.log('Users API Response:', usersResponse);
+        console.log('Users array:', usersResponse.users);
+        console.log('Total count:', usersResponse.totalCount);
+        
+        setUsers(usersResponse.users || []);
+        setTotalUsers(usersResponse.totalCount || 0);
       } else {
         const postsResponse = await fetchRecentPosts(postPage, pageSize);
         setPosts(postsResponse.items);
         setTotalPosts(postsResponse.totalCount);
       }
     } catch (err) {
+      console.error('Load data error:', err);
       setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {
       setLoading(false);
@@ -271,42 +279,50 @@ function AdminPanelContent() {
                         </tr>
                       </thead>
                       <tbody className="bg-card divide-y divide-border">
-                        {users && users.map((user) => (
-                          <tr key={user.id}>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div>
-                                <div className="text-sm font-medium text-foreground">{user.displayName}</div>
-                                <div className="text-sm text-muted-foreground">@{user.username}</div>
-                              </div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">{user.email}</td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <Badge variant={user.role === 'Admin' ? 'default' : 'secondary'}>
-                                {user.role}
-                              </Badge>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="flex items-center">
-                                <Switch
-                                  checked={user.isActive}
-                                  onCheckedChange={() => handleToggleUserStatus(user.id, user.isActive)}
-                                  disabled={user.id === currentUser?.id} // Prevent admin from deactivating themselves
-                                />
-                                <span className="ml-2 text-sm text-muted-foreground">
-                                  {user.isActive ? 'Active' : 'Inactive'}
-                                </span>
-                              </div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
-                              {new Date(user.createdDate).toLocaleDateString()}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                              <Button variant="outline" size="sm">
-                                <Edit className="h-4 w-4" />
-                              </Button>
+                        {users && users.length > 0 ? (
+                          users.map((user) => (
+                            <tr key={user.id}>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <div>
+                                  <div className="text-sm font-medium text-foreground">{user.displayName}</div>
+                                  <div className="text-sm text-muted-foreground">@{user.username}</div>
+                                </div>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">{user.email}</td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <Badge variant={user.role === 'Admin' ? 'default' : 'secondary'}>
+                                  {user.role}
+                                </Badge>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <div className="flex items-center">
+                                  <Switch
+                                    checked={user.isActive}
+                                    onCheckedChange={() => handleToggleUserStatus(user.id, user.isActive)}
+                                    disabled={user.id === currentUser?.id} // Prevent admin from deactivating themselves
+                                  />
+                                  <span className="ml-2 text-sm text-muted-foreground">
+                                    {user.isActive ? 'Active' : 'Inactive'}
+                                  </span>
+                                </div>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
+                                {new Date(user.createdDate).toLocaleDateString()}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                <Button variant="outline" size="sm">
+                                  <Edit className="h-4 w-4" />
+                                </Button>
+                              </td>
+                            </tr>
+                          ))
+                        ) : (
+                          <tr>
+                            <td colSpan={6} className="px-6 py-8 text-center text-muted-foreground">
+                              {error ? 'Failed to load users. Check console for details.' : 'No users found.'}
                             </td>
                           </tr>
-                        ))}
+                        )}
                       </tbody>
                     </table>
                   </div>
@@ -364,7 +380,7 @@ function AdminPanelContent() {
                                 {post.status === 1 ? 'Published' : post.status === 0 ? 'Draft' : 'Archived'}
                               </Badge>
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
                               {new Date(post.publishedDate).toLocaleDateString()}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">

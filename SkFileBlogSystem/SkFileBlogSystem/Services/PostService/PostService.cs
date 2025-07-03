@@ -136,7 +136,7 @@ public class PostService : IPostService
                 Description = request.Description,
                 Content = request.Content,
                 AuthorId = authorId,
-                AuthorName = user.DisplayName,
+                AuthorName = !string.IsNullOrEmpty(user.DisplayName) ? user.DisplayName : user.Username,
                 PublishedDate = request.Status == PostStatus.Published ? postDate : DateTime.MinValue,
                 ModifiedDate = postDate,
                 Status = request.Status,

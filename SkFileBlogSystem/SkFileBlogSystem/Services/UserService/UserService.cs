@@ -120,7 +120,7 @@ public class UserService : IUserService
                 Username = request.Username,
                 Email = request.Email,
                 PasswordHash = HashPassword(request.Password),
-                DisplayName = request.DisplayName ?? request.Username,
+                DisplayName = !string.IsNullOrEmpty(request.DisplayName) ? request.DisplayName : request.Username,
                 Role = request.Role,
                 IsActive = true,
                 CreatedDate = DateTime.UtcNow

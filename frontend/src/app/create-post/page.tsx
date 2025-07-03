@@ -121,6 +121,8 @@ function CreatePostForm() {
         createData.scheduledDate = undefined;
       }
       
+      if(createData.scheduledDate && createData.status == 0) {createData.status =2;} // Set to scheduled if date is provided
+      
       const response = await createPost(createData, authToken);
       
       // Redirect to the newly created post

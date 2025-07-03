@@ -50,7 +50,7 @@ function LoginForm() {
       
       // Redirect to home page
       router.push('/');
-      router.refresh(); // Refresh to update the navbar state
+      window.location.href = '/' // refresh to ensure client-side state is updated
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Login failed');
     } finally {

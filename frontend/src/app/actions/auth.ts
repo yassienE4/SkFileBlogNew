@@ -17,6 +17,8 @@ export async function loginAction(formData: FormData) {
     const response = await login({ username, password });
     await setAuthCookies(response.accessToken, response.refreshToken, response.user);
     redirect('/');
+
+    
   } catch (error) {
     throw new Error(error instanceof Error ? error.message : 'Login failed');
   }

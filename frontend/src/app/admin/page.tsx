@@ -382,8 +382,14 @@ function AdminPanelContent() {
                                     <Eye className="h-4 w-4" />
                                   </a>
                                 </Button>
-                                <Button variant="outline" size="sm" asChild>
-                                  <a href={`/edit-post/${post.slug}`}>
+                                <Button 
+                                  variant="outline" 
+                                  size="sm" 
+                                  asChild
+                                  disabled={currentUser?.id !== post.authorId}
+                                  className={currentUser?.id !== post.authorId ? 'opacity-50 cursor-not-allowed' : ''}
+                                >
+                                  <a href={currentUser?.id === post.authorId ? `/edit-post/${post.slug}` : '#'}>
                                     <Edit className="h-4 w-4" />
                                   </a>
                                 </Button>

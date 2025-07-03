@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Our Blog - Latest Stories and Insights",
+  title: "SK Blog - Latest Stories and Insights",
   description: "Discover the latest insights, stories, and updates from our team",
 };
 

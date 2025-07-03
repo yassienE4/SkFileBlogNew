@@ -11,6 +11,13 @@ export interface User {
   isActive: boolean;
 }
 
+export interface UserInfo {
+  id: string;
+  username: string;
+  displayName: string;
+  role: string;
+}
+
 export interface RegisterRequest {
   username: string;
   email: string;
@@ -41,4 +48,20 @@ export interface LoginResponse {
   refreshToken: string;
   expiresAt: string;
   user: LoginUser;
+}
+
+export interface CreateUserRequest {
+  username: string;
+  email: string;
+  password: string;
+  displayName: string;
+  role: string;
+}
+
+export interface UsersResponse {
+  users: User[];
+  totalCount: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
 }

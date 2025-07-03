@@ -5,7 +5,16 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { getCurrentUserClient, clearAuthCookiesClient } from '@/lib/auth-client';
 import { Button } from '@/components/ui/button';
+import { 
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { LoginUser } from '@/types/auth';
+import { User, Settings, FileText, Shield, LogOut, ChevronDown } from 'lucide-react';
 
 export function Navbar() {
   const router = useRouter();
@@ -71,13 +80,15 @@ export function Navbar() {
             {isLoading ? (
               <div className="h-9 w-20 bg-muted animate-pulse rounded"></div>
             ) : user ? (
-              <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-3">
                 <Link href="/create-post">
                   <Button variant="outline" size="sm">
                     Create Post
                   </Button>
                 </Link>
-                <div className="hidden sm:block">
+                
+                {/* User info - only show on larger screens */}
+                <div className="hidden lg:block">
                   <span className="text-sm text-muted-foreground">
                     Welcome, <span className="font-medium text-foreground">{user.displayName || user.username}</span>
                   </span>
@@ -87,23 +98,66 @@ export function Navbar() {
                     </span>
                   )}
                 </div>
-                <Link href="/my-posts">
-                  <Button variant="ghost" size="sm">
-                    My Posts
-                  </Button>
-                </Link>
-                <Link href="/profile">
-                  <Button variant="ghost" size="sm">
-                    Profile
-                  </Button>
-                </Link>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={handleLogout}
-                >
-                  Logout
-                </Button>
+
+                {/* User dropdown menu */}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="sm" className="gap-1">
+                      <User className="h-4 w-4" />
+                      <span className="hidden sm:inline">{user.displayName || user.username}</span>
+                      <ChevronDown className="h-3 w-3" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-56">
+                    <DropdownMenuLabel>
+                      <div className="flex flex-col space-y-1">
+                        <p className="text-sm font-medium">{user.displayName || user.username}</p>
+                        <p className="text-xs text-muted-foreground">@{user.username}</p>
+                        {user.role !== 'User' && (
+                          <span className="px-2 py-1 text-xs bg-primary/10 text-primary rounded w-fit">
+                            {user.role}
+                          </span>
+                        )}
+                      </div>
+                    </DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    
+                    <DropdownMenuItem asChild>
+                      <Link href="/my-posts" className="cursor-pointer">
+                        <FileText className="mr-2 h-4 w-4" />
+                        My Posts
+                      </Link>
+                    </DropdownMenuItem>
+                    
+                    <DropdownMenuItem asChild>
+                      <Link href="/profile" className="cursor-pointer">
+                        <Settings className="mr-2 h-4 w-4" />
+                        Profile
+                      </Link>
+                    </DropdownMenuItem>
+                    
+                    {user.role === 'Admin' && (
+                      <>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem asChild>
+                          <Link href="/admin" className="cursor-pointer">
+                            <Shield className="mr-2 h-4 w-4" />
+                            Admin Panel
+                          </Link>
+                        </DropdownMenuItem>
+                      </>
+                    )}
+                    
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem 
+                      onClick={handleLogout}
+                      className="cursor-pointer text-red-600 focus:text-red-600"
+                    >
+                      <LogOut className="mr-2 h-4 w-4" />
+                      Logout
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
             ) : (
               <div className="flex items-center space-x-2">

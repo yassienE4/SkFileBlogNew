@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { deletePost } from '@/lib/api';
-import { getAuthTokenClient } from '@/lib/auth-client';
+import { getCurrentUserClient, getAuthTokenClient } from '@/lib/auth-client';
 import { Button } from '@/components/ui/button';
 import { Edit, Trash2 } from 'lucide-react';
 import { 
@@ -19,12 +19,18 @@ import Link from 'next/link';
 interface PostActionsProps {
   slug: string;
   isOwner: boolean;
+  authorId?: string;
 }
 
-export function PostActions({ slug, isOwner }: PostActionsProps) {
+export function PostActions({ slug, isOwner, authorId }: PostActionsProps) {
   const router = useRouter();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const currentUser = getCurrentUserClient();
+  
+  // Check if user is admin or owner
+  const canEdit = isOwner;
+  const canDelete = isOwner || (currentUser?.role === 'Admin');
 
   const handleDeleteConfirm = async () => {
     setIsDeleting(true);
@@ -48,7 +54,7 @@ export function PostActions({ slug, isOwner }: PostActionsProps) {
     }
   };
 
-  if (!isOwner) {
+  if (!canEdit && !canDelete) {
     return null;
   }
 
@@ -57,24 +63,32 @@ export function PostActions({ slug, isOwner }: PostActionsProps) {
       <div className="flex gap-2 p-4 border rounded-lg bg-muted/30">
         <div className="flex-1">
           <h3 className="font-medium text-sm">Post Management</h3>
-          <p className="text-xs text-muted-foreground">You own this post and can edit or delete it.</p>
+          <p className="text-xs text-muted-foreground">
+            {isOwner 
+              ? "You own this post and can edit or delete it." 
+              : "Admin privileges: You can delete this post."}
+          </p>
         </div>
         <div className="flex gap-2">
-          <Link href={`/edit-post/${slug}`}>
-            <Button size="sm" variant="outline">
-              <Edit className="h-4 w-4 mr-1" />
-              Edit
+          {canEdit && (
+            <Link href={`/edit-post/${slug}`}>
+              <Button size="sm" variant="outline">
+                <Edit className="h-4 w-4 mr-1" />
+                Edit
+              </Button>
+            </Link>
+          )}
+          {canDelete && (
+            <Button 
+              size="sm" 
+              variant="outline" 
+              className="text-destructive hover:text-destructive"
+              onClick={() => setDeleteDialogOpen(true)}
+            >
+              <Trash2 className="h-4 w-4 mr-1" />
+              Delete
             </Button>
-          </Link>
-          <Button 
-            size="sm" 
-            variant="outline" 
-            className="text-destructive hover:text-destructive"
-            onClick={() => setDeleteDialogOpen(true)}
-          >
-            <Trash2 className="h-4 w-4 mr-1" />
-            Delete
-          </Button>
+          )}
         </div>
       </div>
 

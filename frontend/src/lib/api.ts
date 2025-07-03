@@ -1,5 +1,5 @@
 import { BlogPostsResponse, TagsResponse, CategoriesResponse, BlogPost, CreatePostRequest, CreatePostResponse, UpdatePostRequest } from '@/types/blog';
-import { RegisterRequest, RegisterResponse, LoginRequest, LoginResponse } from '@/types/auth';
+import { RegisterRequest, RegisterResponse, LoginRequest, LoginResponse, UsersResponse, CreateUserRequest, User } from '@/types/auth';
 
 const BASE_URL = 'http://localhost:5141/api';
 
@@ -164,4 +164,69 @@ export async function login(data: LoginRequest): Promise<LoginResponse> {
   }
   
   return response.json();
+}
+
+// User Management API functions (Admin only)
+export async function fetchAllUsers(authToken: string, page: number = 1, pageSize: number = 10): Promise<UsersResponse> {
+  const response = await fetch(`${BASE_URL}/users?page=${page}&pageSize=${pageSize}`, {
+    headers: {
+      'Authorization': `Bearer ${authToken}`,
+    },
+    cache: 'no-store',
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(errorText || 'Failed to fetch users');
+  }
+
+  return response.json();
+}
+
+export async function createUser(data: CreateUserRequest, authToken: string): Promise<User> {
+  const response = await fetch(`${BASE_URL}/users`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${authToken}`,
+    },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(errorText || 'Failed to create user');
+  }
+
+  return response.json();
+}
+
+export async function updateUserStatus(userId: string, isActive: boolean, authToken: string): Promise<void> {
+  const response = await fetch(`${BASE_URL}/users/${userId}/status`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${authToken}`,
+    },
+    body: JSON.stringify({ isActive }),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(errorText || 'Failed to update user status');
+  }
+}
+
+export async function deleteUser(userId: string, authToken: string): Promise<void> {
+  const response = await fetch(`${BASE_URL}/users/${userId}`, {
+    method: 'DELETE',
+    headers: {
+      'Authorization': `Bearer ${authToken}`,
+    },
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(errorText || 'Failed to delete user');
+  }
 }

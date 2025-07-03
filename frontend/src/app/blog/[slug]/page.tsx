@@ -117,8 +117,8 @@ export default async function PostPage({ params }: PostPageProps) {
               </div>
             </header>
 
-            {/* Post Actions (only shown to post owner) */}
-            <PostActions slug={post.slug} isOwner={!!isOwner} />
+            {/* Post Actions (only shown to post owner or admin) */}
+            <PostActions slug={post.slug} isOwner={!!isOwner} authorId={post.authorId} />
 
             {/* Content */}
             <div className="prose prose-lg dark:prose-invert max-w-none">

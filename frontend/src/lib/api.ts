@@ -32,7 +32,7 @@ export async function fetchTags(page: number = 1, pageSize: number = 10): Promis
 
 export async function fetchCategories(page: number = 1, pageSize: number = 10): Promise<CategoriesResponse> {
   const response = await fetch(`${BASE_URL}/categories?page=${page}&pageSize=${pageSize}`, {
-    next: { revalidate: 3600 }, // Revalidate every hour
+    cache: 'no-store', // Disable cache temporarily to get fresh data
   });
   
   if (!response.ok) {

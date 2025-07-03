@@ -61,21 +61,38 @@ function AdminPanelContent() {
     setError(null);
     
     try {
-      if (activeTab === 'users') {
-        console.log('Fetching users with token:', authToken ? 'Token present' : 'No token');
-        console.log('Page:', userPage, 'PageSize:', pageSize);
-        
-        const usersResponse = await fetchAllUsers(authToken, userPage, pageSize);
-        console.log('Users API Response:', usersResponse);
-        console.log('Users array:', usersResponse.users);
-        console.log('Total count:', usersResponse.totalCount);
-        
-        setUsers(usersResponse.users || []);
-        setTotalUsers(usersResponse.totalCount || 0);
+      // Always load both counts for tab display, but only load full data for active tab
+      const [usersResponse, postsResponse] = await Promise.allSettled([
+        fetchAllUsers(authToken, activeTab === 'users' ? userPage : 1, activeTab === 'users' ? pageSize : 1),
+        fetchRecentPosts(activeTab === 'posts' ? postPage : 1, activeTab === 'posts' ? pageSize : 1)
+      ]);
+
+      // Handle users response
+      if (usersResponse.status === 'fulfilled') {
+        console.log('Users API Response:', usersResponse.value);
+        if (activeTab === 'users') {
+          setUsers(usersResponse.value.users || []);
+        }
+        setTotalUsers(usersResponse.value.totalCount || 0);
       } else {
-        const postsResponse = await fetchRecentPosts(postPage, pageSize);
-        setPosts(postsResponse.items);
-        setTotalPosts(postsResponse.totalCount);
+        console.error('Users API error:', usersResponse.reason);
+        if (activeTab === 'users') {
+          setError(usersResponse.reason instanceof Error ? usersResponse.reason.message : 'Failed to load users');
+        }
+      }
+
+      // Handle posts response
+      if (postsResponse.status === 'fulfilled') {
+        console.log('Posts API Response:', postsResponse.value);
+        if (activeTab === 'posts') {
+          setPosts(postsResponse.value.items || []);
+        }
+        setTotalPosts(postsResponse.value.totalCount || 0);
+      } else {
+        console.error('Posts API error:', postsResponse.reason);
+        if (activeTab === 'posts') {
+          setError(postsResponse.reason instanceof Error ? postsResponse.reason.message : 'Failed to load posts');
+        }
       }
     } catch (err) {
       console.error('Load data error:', err);

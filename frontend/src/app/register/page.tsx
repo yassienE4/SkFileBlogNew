@@ -195,7 +195,7 @@ export default function RegisterPage() {
                 <p className="text-xs text-destructive">{fieldErrors.password}</p>
               )}
               <p className="text-xs text-muted-foreground">
-                Password must be at least 6 characters long
+                Password must be at least 8 characters long
               </p>
             </div>
 

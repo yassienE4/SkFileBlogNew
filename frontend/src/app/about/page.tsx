@@ -16,7 +16,7 @@ export default function AboutPage() {
             </Link>
           </div>
           <h1 className="text-4xl font-bold tracking-tight mb-4">
-            About Our Blog
+            About SK Blog
           </h1>
           <p className="text-xl text-muted-foreground">
             Learn more about our mission, vision, and the team behind the content
@@ -32,7 +32,7 @@ export default function AboutPage() {
             <CardContent className="space-y-4">
               <p className="text-lg leading-relaxed">
                 We're dedicated to sharing valuable insights, stories, and knowledge with our community. 
-                Our blog serves as a platform for thought leadership, technical deep-dives, and industry perspectives.
+                SK blog serves as a platform for thought leadership, technical deep-dives, and industry perspectives.
               </p>
               <p className="leading-relaxed">
                 Whether you're looking for the latest trends, practical tutorials, or behind-the-scenes stories, 
@@ -110,7 +110,7 @@ export default function AboutPage() {
 
 export async function generateMetadata() {
   return {
-    title: 'About | Our Blog',
+    title: 'About | SK Blog',
     description: 'Learn more about our blog, mission, and the team behind the content',
   };
 }

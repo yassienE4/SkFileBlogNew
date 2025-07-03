@@ -125,7 +125,7 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
 
 export async function generateMetadata() {
   return {
-    title: 'All Posts | Our Blog',
+    title: 'All Posts | SK Blog',
     description: 'Browse all our blog posts and articles',
   };
 }

@@ -147,7 +147,7 @@ export default async function ProfilePage() {
 
 export async function generateMetadata() {
   return {
-    title: 'Profile | Our Blog',
+    title: 'Profile | SK Blog',
     description: 'Manage your account information and preferences',
   };
 }

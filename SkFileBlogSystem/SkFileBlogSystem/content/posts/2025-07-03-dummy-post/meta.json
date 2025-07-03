@@ -1,0 +1,19 @@
+{
+  "Id": "f12f128d-b686-42a1-91d4-9d11c0b1c1c5",
+  "Title": "dummy post",
+  "Slug": "dummy-post",
+  "Description": "testing all features",
+  "AuthorId": "06d9cf9e-04ba-432f-ad9b-2d8f64f30f0b",
+  "AuthorName": "",
+  "PublishedDate": "2025-07-03T00:47:43.406281Z",
+  "ModifiedDate": "2025-07-03T00:47:43.406281Z",
+  "Status": 1,
+  "ScheduledDate": null,
+  "Tags": [
+    "blog"
+  ],
+  "Categories": [
+    "blog"
+  ],
+  "CustomUrl": ""
+}

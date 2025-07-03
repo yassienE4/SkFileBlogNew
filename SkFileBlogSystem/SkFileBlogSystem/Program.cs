@@ -92,7 +92,6 @@ app.MapPost("/api/auth/login", async (LoginRequest request, IAuthService authSer
     return result.IsSuccess ? Results.Ok(result.Data) : Results.Unauthorized();
 })
 .WithName("Login");
-// Add this endpoint after your existing auth endpoints in Program.cs
 
 app.MapPost("/api/auth/register", async (RegisterRequest request, IAuthService authService) =>
     {

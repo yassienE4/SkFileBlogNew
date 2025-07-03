@@ -19,7 +19,7 @@ export default async function Home() {
           {/* Header */}
           <header className="text-center mb-12">
             <h1 className="text-4xl font-bold tracking-tight mb-4">
-              Welcome to Our Blog
+              Welcome to SK Blog
             </h1>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
               Discover the latest insights, stories, and updates from our team.

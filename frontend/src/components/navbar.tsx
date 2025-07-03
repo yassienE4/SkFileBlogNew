@@ -45,7 +45,7 @@ export function Navbar() {
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-8">
             <Link href="/">
-              <h1 className="text-xl font-bold hover:text-primary transition-colors">Our Blog</h1>
+              <h1 className="text-xl font-bold hover:text-primary transition-colors">SK Blog</h1>
             </Link>
             <div className="hidden md:flex space-x-6">
               <Link href="/" className="text-muted-foreground hover:text-foreground transition-colors">

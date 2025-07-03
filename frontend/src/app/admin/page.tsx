@@ -128,13 +128,13 @@ function AdminPanelContent() {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Admin Panel</h1>
-        <p className="text-gray-600">Manage users and content</p>
+        <h1 className="text-3xl font-bold text-foreground mb-2">Admin Panel</h1>
+        <p className="text-muted-foreground">Manage users and content</p>
       </div>
 
       {error && (
-        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-          <p className="text-red-600">{error}</p>
+        <div className="mb-6 p-4 bg-destructive/10 border border-destructive/20 rounded-lg">
+          <p className="text-destructive">{error}</p>
           <Button 
             onClick={() => setError(null)}
             variant="outline"
@@ -148,13 +148,13 @@ function AdminPanelContent() {
 
       {/* Tab Navigation */}
       <div className="mb-6">
-        <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg w-fit">
+        <div className="flex space-x-1 bg-muted p-1 rounded-lg w-fit">
           <button
             onClick={() => setActiveTab('users')}
             className={`flex items-center px-4 py-2 rounded-md text-sm font-medium transition-colors ${
               activeTab === 'users'
-                ? 'bg-white text-gray-900 shadow-sm'
-                : 'text-gray-600 hover:text-gray-900'
+                ? 'bg-background text-foreground shadow-sm'
+                : 'text-muted-foreground hover:text-foreground'
             }`}
           >
             <Users className="mr-2 h-4 w-4" />
@@ -164,8 +164,8 @@ function AdminPanelContent() {
             onClick={() => setActiveTab('posts')}
             className={`flex items-center px-4 py-2 rounded-md text-sm font-medium transition-colors ${
               activeTab === 'posts'
-                ? 'bg-white text-gray-900 shadow-sm'
-                : 'text-gray-600 hover:text-gray-900'
+                ? 'bg-background text-foreground shadow-sm'
+                : 'text-muted-foreground hover:text-foreground'
             }`}
           >
             <FileText className="mr-2 h-4 w-4" />
@@ -253,33 +253,33 @@ function AdminPanelContent() {
           </div>
 
           {loading ? (
-            <div className="text-center py-8">Loading users...</div>
+            <div className="text-center py-8 text-muted-foreground">Loading users...</div>
           ) : (
             <>
               <Card>
                 <CardContent className="p-0">
                   <div className="overflow-x-auto">
                     <table className="w-full">
-                      <thead className="bg-gray-50">
+                      <thead className="bg-muted/50">
                         <tr>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">User</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Email</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Role</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Status</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Created</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Actions</th>
                         </tr>
                       </thead>
-                      <tbody className="bg-white divide-y divide-gray-200">
+                      <tbody className="bg-card divide-y divide-border">
                         {users && users.map((user) => (
                           <tr key={user.id}>
                             <td className="px-6 py-4 whitespace-nowrap">
                               <div>
-                                <div className="text-sm font-medium text-gray-900">{user.displayName}</div>
-                                <div className="text-sm text-gray-500">@{user.username}</div>
+                                <div className="text-sm font-medium text-foreground">{user.displayName}</div>
+                                <div className="text-sm text-muted-foreground">@{user.username}</div>
                               </div>
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{user.email}</td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">{user.email}</td>
                             <td className="px-6 py-4 whitespace-nowrap">
                               <Badge variant={user.role === 'Admin' ? 'default' : 'secondary'}>
                                 {user.role}
@@ -292,12 +292,12 @@ function AdminPanelContent() {
                                   onCheckedChange={() => handleToggleUserStatus(user.id, user.isActive)}
                                   disabled={user.id === currentUser?.id} // Prevent admin from deactivating themselves
                                 />
-                                <span className="ml-2 text-sm text-gray-500">
+                                <span className="ml-2 text-sm text-muted-foreground">
                                   {user.isActive ? 'Active' : 'Inactive'}
                                 </span>
                               </div>
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
                               {new Date(user.createdDate).toLocaleDateString()}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
@@ -335,30 +335,30 @@ function AdminPanelContent() {
           </div>
 
           {loading ? (
-            <div className="text-center py-8">Loading posts...</div>
+            <div className="text-center py-8 text-muted-foreground">Loading posts...</div>
           ) : (
             <>
               <Card>
                 <CardContent className="p-0">
                   <div className="overflow-x-auto">
                     <table className="w-full">
-                      <thead className="bg-gray-50">
+                      <thead className="bg-muted/50">
                         <tr>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Author</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Published</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Title</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Author</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Status</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Published</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Actions</th>
                         </tr>
                       </thead>
-                      <tbody className="bg-white divide-y divide-gray-200">
+                      <tbody className="bg-card divide-y divide-border">
                         {posts && posts.map((post) => (
                           <tr key={post.id}>
                             <td className="px-6 py-4">
-                              <div className="text-sm font-medium text-gray-900">{post.title}</div>
-                              <div className="text-sm text-gray-500 truncate max-w-xs">{post.description}</div>
+                              <div className="text-sm font-medium text-foreground">{post.title}</div>
+                              <div className="text-sm text-muted-foreground truncate max-w-xs">{post.description}</div>
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{post.authorName}</td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">{post.authorName}</td>
                             <td className="px-6 py-4 whitespace-nowrap">
                               <Badge variant={post.status === 1 ? 'default' : post.status === 0 ? 'secondary' : 'outline'}>
                                 {post.status === 1 ? 'Published' : post.status === 0 ? 'Draft' : 'Archived'}

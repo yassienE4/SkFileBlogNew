@@ -242,20 +242,79 @@ app.MapPost("/api/media/upload", async (IFormFile file, IMediaService mediaServi
 .DisableAntiforgery()
 .WithName("UploadMedia");
 
+app.MapGet("/api/media/{fileId}", async (string fileId, IMediaService mediaService) =>
+{
+    var mediaFile = await mediaService.GetFileAsync(fileId);
+    return mediaFile != null ? Results.Ok(mediaFile) : Results.NotFound();
+})
+.WithName("GetMediaInfo");
+
+app.MapGet("/api/media", async (IMediaService mediaService, ClaimsPrincipal user) =>
+{
+    var userRole = user.FindFirst(ClaimTypes.Role)?.Value;
+    var userId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+    
+    if (userRole == "Admin" || userRole == "Editor")
+    {
+        var allFiles = await mediaService.GetAllFilesAsync();
+        return Results.Ok(allFiles);
+    }
+    
+    if (!string.IsNullOrEmpty(userId))
+    {
+        var userFiles = await mediaService.GetFilesByUserAsync(userId);
+        return Results.Ok(userFiles);
+    }
+    
+    return Results.Unauthorized();
+})
+.RequireAuthorization()
+.WithName("GetAllMedia");
+
+app.MapGet("/media/{*filePath}", async (string filePath, IMediaService mediaService) =>
+{
+    var file = await mediaService.GetFileStreamAsync(filePath);
+    if (file == null)
+        return Results.NotFound();
+
+    return Results.Stream(file.Value.Stream, file.Value.ContentType, file.Value.FileName);
+})
+.WithName("ServeMedia");
+
+app.MapDelete("/api/media/{fileId}", async (string fileId, IMediaService mediaService, ClaimsPrincipal user) =>
+{
+    var userId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+    var userRole = user.FindFirst(ClaimTypes.Role)?.Value;
+    
+    var mediaFile = await mediaService.GetFileAsync(fileId);
+    if (mediaFile == null)
+        return Results.NotFound();
+
+    // Only admin or the file owner can delete
+    if (userRole != "Admin" && mediaFile.UploadedBy != userId)
+        return Results.Forbid();
+
+    var result = await mediaService.DeleteFileAsync(fileId);
+    return result.IsSuccess ? Results.NoContent() : Results.BadRequest(result.ErrorMessage);
+})
+.RequireAuthorization()
+.WithName("DeleteMedia");
+
 // Feed endpoints
 app.MapGet("/feed/rss", async (IFeedService feedService) =>
-{
-    var feed = await feedService.GenerateRssFeedAsync();
-    return Results.Content(feed, "application/rss+xml");
-})
-.WithName("GetRssFeed");
+    {
+        var feed = await feedService.GenerateRssFeedAsync();
+        return Results.Content(feed, "application/rss+xml");
+    })
+    .WithName("GetRssFeed");
 
 app.MapGet("/feed/atom", async (IFeedService feedService) =>
-{
-    var feed = await feedService.GenerateAtomFeedAsync();
-    return Results.Content(feed, "application/atom+xml");
-})
-.WithName("GetAtomFeed");
+    {
+        var feed = await feedService.GenerateAtomFeedAsync();
+        return Results.Content(feed, "application/atom+xml");
+    })
+    .WithName("GetAtomFeed");
+
 
 // User management endpoints (Admin only)
 app.MapGet("/api/users", async (IUserService userService) =>

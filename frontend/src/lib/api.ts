@@ -1,5 +1,6 @@
 import { BlogPostsResponse, TagsResponse, CategoriesResponse, BlogPost, CreatePostRequest, CreatePostResponse, UpdatePostRequest } from '@/types/blog';
 import { RegisterRequest, RegisterResponse, LoginRequest, LoginResponse, UsersResponse, CreateUserRequest, User } from '@/types/auth';
+import { MediaFile } from '@/types/media';
 
 const BASE_URL = 'http://localhost:5141/api';
 
@@ -259,5 +260,57 @@ export async function deleteUser(userId: string, authToken: string): Promise<voi
   if (!response.ok) {
     const errorText = await response.text();
     throw new Error(errorText || 'Failed to delete user');
+  }
+}
+
+// Media upload API
+export async function uploadFile(file: File, authToken: string): Promise<MediaFile> {
+  const formData = new FormData();
+  formData.append('file', file);
+
+  const response = await fetch(`${BASE_URL}/media/upload`, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${authToken}`,
+    },
+    body: formData,
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(errorText || 'Failed to upload file');
+  }
+
+  return response.json();
+}
+
+// Get media files for the user
+export async function getMediaFiles(authToken: string): Promise<MediaFile[]> {
+  const response = await fetch(`${BASE_URL}/media`, {
+    headers: {
+      'Authorization': `Bearer ${authToken}`,
+    },
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(errorText || 'Failed to fetch media files');
+  }
+
+  return response.json();
+}
+
+// Delete media file
+export async function deleteMediaFile(fileId: string, authToken: string): Promise<void> {
+  const response = await fetch(`${BASE_URL}/media/${fileId}`, {
+    method: 'DELETE',
+    headers: {
+      'Authorization': `Bearer ${authToken}`,
+    },
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(errorText || 'Failed to delete file');
   }
 }

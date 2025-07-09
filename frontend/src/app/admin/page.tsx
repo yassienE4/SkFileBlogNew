@@ -13,7 +13,7 @@ import { fetchAllUsers, createUser, fetchRecentPosts, deletePost } from '@/lib/a
 import { getCurrentUserClient, getAuthTokenClient } from '@/lib/auth-client';
 import { User, CreateUserRequest } from '@/types/auth';
 import { BlogPost } from '@/types/blog';
-import { Trash2, Users, FileText, UserPlus, Edit, Eye } from 'lucide-react';
+import { Trash2, Users, FileText, UserPlus, Edit, Eye, Image as ImageIcon } from 'lucide-react';
 import AdminRoute from '@/components/admin-route';
 
 function AdminPanelContent() {
@@ -23,7 +23,7 @@ function AdminPanelContent() {
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'users' | 'posts'>('users');
+  const [activeTab, setActiveTab] = useState<'users' | 'posts' | 'media'>('users');
   const [userPage, setUserPage] = useState(1);
   const [postPage, setPostPage] = useState(1);
   const [totalUsers, setTotalUsers] = useState(0);
@@ -183,6 +183,17 @@ function AdminPanelContent() {
           >
             <FileText className="mr-2 h-4 w-4" />
             Posts ({totalPosts})
+          </button>
+          <button
+            onClick={() => setActiveTab('media')}
+            className={`flex items-center px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+              activeTab === 'media'
+                ? 'bg-background text-foreground shadow-sm'
+                : 'text-muted-foreground hover:text-foreground'
+            }`}
+          >
+            <ImageIcon className="mr-2 h-4 w-4" />
+            Media
           </button>
         </div>
       </div>
@@ -422,6 +433,36 @@ function AdminPanelContent() {
               )}
             </>
           )}
+        </div>
+      )}
+
+      {/* Media Tab */}
+      {activeTab === 'media' && (
+        <div>
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-xl font-semibold">Media Management</h2>
+            <Button asChild>
+              <a href="/admin/media">
+                <ImageIcon className="mr-2 h-4 w-4" />
+                Open Media Manager
+              </a>
+            </Button>
+          </div>
+          
+          <Card>
+            <CardContent className="p-6">
+              <div className="text-center">
+                <ImageIcon className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+                <h3 className="text-lg font-medium mb-2">Media Library</h3>
+                <p className="text-muted-foreground mb-4">
+                  Manage your uploaded images and documents in the dedicated media manager.
+                </p>
+                <Button asChild>
+                  <a href="/admin/media">Go to Media Manager</a>
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       )}
     </div>

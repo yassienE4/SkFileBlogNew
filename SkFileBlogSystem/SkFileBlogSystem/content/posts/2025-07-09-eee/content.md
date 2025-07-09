@@ -1,0 +1,1 @@
+![Image](http://localhost:5141/media/2025-07/59123a0c-8d3b-4cc6-ad0d-ffb084533469.jpeg)

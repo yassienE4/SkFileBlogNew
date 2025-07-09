@@ -3,10 +3,13 @@
 import React, { useState } from 'react';
 import { markdownToHtml, isMarkdown } from '@/lib/markdown';
 import { MarkdownGuide } from '@/components/markdown-guide';
+import { ImageUpload } from '@/components/image-upload';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { ImageIcon } from 'lucide-react';
 
 interface MarkdownPreviewProps {
   content: string;
@@ -24,6 +27,7 @@ export function MarkdownPreview({
   const [activeTab, setActiveTab] = useState<'edit' | 'preview'>('edit');
   const [previewHtml, setPreviewHtml] = useState<string>('');
   const [isProcessing, setIsProcessing] = useState(false);
+  const [showImageUpload, setShowImageUpload] = useState(false);
 
   const handlePreview = async () => {
     if (activeTab === 'preview' && !previewHtml) {
@@ -60,6 +64,33 @@ export function MarkdownPreview({
     setTimeout(() => {
       textarea.focus();
       const newPosition = start + before.length + textToInsert.length;
+      textarea.setSelectionRange(newPosition, newPosition);
+    }, 0);
+  };
+
+  const insertImage = (imageUrl: string) => {
+    if (readonly || !onChange) return;
+    
+    const textarea = document.querySelector('textarea') as HTMLTextAreaElement;
+    if (!textarea) return;
+
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    
+    // Insert markdown image syntax
+    const imageMarkdown = `![Image](${imageUrl})`;
+    const newContent = 
+      content.substring(0, start) + 
+      imageMarkdown + 
+      content.substring(end);
+    
+    onChange(newContent);
+    setShowImageUpload(false);
+    
+    // Reset cursor position
+    setTimeout(() => {
+      textarea.focus();
+      const newPosition = start + imageMarkdown.length;
       textarea.setSelectionRange(newPosition, newPosition);
     }, 0);
   };
@@ -133,6 +164,30 @@ export function MarkdownPreview({
                   {tool.icon}
                 </Button>
               ))}
+              
+              {/* Image Upload Button */}
+              <Dialog open={showImageUpload} onOpenChange={setShowImageUpload}>
+                <DialogTrigger asChild>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    title="Insert Image"
+                    className="h-8 w-8 p-0"
+                  >
+                    <ImageIcon className="h-4 w-4" />
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-2xl">
+                  <DialogHeader>
+                    <DialogTitle>Insert Image</DialogTitle>
+                  </DialogHeader>
+                  <ImageUpload 
+                    onImageSelect={insertImage}
+                    showMediaLibrary={true}
+                  />
+                </DialogContent>
+              </Dialog>
             </div>
             <MarkdownGuide />
           </div>

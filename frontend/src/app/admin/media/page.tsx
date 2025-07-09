@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { getMediaFiles, deleteMediaFile } from '@/lib/api';
+import { getMediaFiles, deleteMediaFile, BASE_URL } from '@/lib/api';
 import { getAuthTokenClient } from '@/lib/auth-client';
 import { MediaFile, MediaType } from '@/types/media';
 import { Button } from '@/components/ui/button';
@@ -85,7 +85,7 @@ function MediaManagementContent() {
   };
 
   const getFileUrl = (mediaFile: MediaFile) => {
-    return `http://localhost:5141/media/${mediaFile.filePath}`;
+    return `${BASE_URL}/media/${mediaFile.filePath}`;
   };
 
   const formatFileSize = (bytes: number) => {

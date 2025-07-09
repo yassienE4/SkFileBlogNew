@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useCallback } from 'react';
-import { uploadFile, getMediaFiles, deleteMediaFile } from '@/lib/api';
+import { uploadFile, getMediaFiles, deleteMediaFile, BASE_URL } from '@/lib/api';
 import { getAuthTokenClient } from '@/lib/auth-client';
 import { MediaFile, MediaType } from '@/types/media';
 import { Button } from '@/components/ui/button';
@@ -62,7 +62,7 @@ export function ImageUpload({
       setMediaFiles(prev => [mediaFile, ...prev]);
       
       if (onImageSelect && mediaFile.type === MediaType.Image) {
-        const imageUrl = `http://localhost:5141/media/${mediaFile.filePath}`;
+        const imageUrl = `${BASE_URL}/media/${mediaFile.filePath}`;
         onImageSelect(imageUrl);
       }
     } catch (error) {
@@ -97,7 +97,7 @@ export function ImageUpload({
   };
 
   const getFileUrl = (mediaFile: MediaFile) => {
-    return `http://localhost:5141/media/${mediaFile.filePath}`;
+    return `${BASE_URL}/media/${mediaFile.filePath}`;
   };
 
   const getFileIcon = (mediaFile: MediaFile) => {

@@ -1,4 +1,4 @@
-import { fetchRecentPosts, fetchTags, fetchCategories } from '@/lib/api';
+import { fetchRecentPosts, fetchTags, fetchCategories, BASE_URL } from '@/lib/api';
 import { BlogPostCard } from '@/components/blog-post-card';
 import { TagsSection } from '@/components/tags-section';
 import { CategoriesSection } from '@/components/categories-section';
@@ -128,7 +128,7 @@ export default async function Home() {
           <div className="text-sm text-muted-foreground">
             <p>Make sure your API server is running on:</p>
             <code className="bg-muted px-2 py-1 rounded text-xs">
-              http://localhost:5141
+              {BASE_URL || 'API_BASE_URL not configured'}
             </code>
           </div>
         </div>

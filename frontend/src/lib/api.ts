@@ -2,8 +2,7 @@ import { BlogPostsResponse, TagsResponse, CategoriesResponse, BlogPost, CreatePo
 import { RegisterRequest, RegisterResponse, LoginRequest, LoginResponse, UsersResponse, CreateUserRequest, User } from '@/types/auth';
 import { MediaFile } from '@/types/media';
 
-const BASE_URL = 'http://localhost:5141/api';
-
+export const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL!;
 export async function fetchRecentPosts(page: number = 1, pageSize: number = 10): Promise<BlogPostsResponse> {
   console.log(`Fetching posts: page=${page}, pageSize=${pageSize}`);
   const response = await fetch(`${BASE_URL}/posts?page=${page}&pageSize=${pageSize}`, {

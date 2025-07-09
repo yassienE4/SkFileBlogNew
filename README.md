@@ -124,6 +124,10 @@ This project is a lightweight, production-ready blog platform that stores all co
 
 The admin panel provides comprehensive management for users, posts, and media.
 
+### Admin Credentials 
+- Username: admin
+- Password: 12345678
+
 ### Features
 
 - **User Management:** View, create, activate/deactivate users, view user info

@@ -23,7 +23,9 @@ builder.Services.AddCors();
 
 // Configure JWT authentication
 var jwtSettings = builder.Configuration.GetSection("JwtSettings");
-var secretKey = jwtSettings["SecretKey"] ?? "your-super-secret-key-change-this-in-production";
+var secretKey = Environment.GetEnvironmentVariable("JWT_SECRET_KEY") ?? 
+                jwtSettings["SecretKey"] ?? 
+                "your-super-secret-key-change-this-in-production";
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -34,8 +36,12 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateAudience = true,
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
-            ValidIssuer = jwtSettings["Issuer"] ?? "blog-system",
-            ValidAudience = jwtSettings["Audience"] ?? "blog-system-users",
+            ValidIssuer = Environment.GetEnvironmentVariable("JWT_ISSUER") ?? 
+                         jwtSettings["Issuer"] ?? 
+                         "blog-system",
+            ValidAudience = Environment.GetEnvironmentVariable("JWT_AUDIENCE") ?? 
+                           jwtSettings["Audience"] ?? 
+                           "blog-system-users",
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey))
         };
     });
@@ -332,5 +338,16 @@ app.MapPost("/api/users", async (CreateUserRequest request, IUserService userSer
 })
 .RequireAuthorization(policy => policy.RequireRole("Admin"))
 .WithName("CreateUser");
+
+// Health check endpoint
+app.MapGet("/health", () => 
+{
+    return Results.Ok(new { 
+        status = "healthy", 
+        timestamp = DateTime.UtcNow,
+        version = "1.0.0" 
+    });
+})
+.WithName("HealthCheck");
 
 app.Run();

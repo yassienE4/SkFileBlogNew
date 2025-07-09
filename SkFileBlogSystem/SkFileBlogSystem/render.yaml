@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: skfile-blog-system
+    runtime: docker
+    plan: starter
+    region: oregon
+    branch: main
+    healthCheckPath: /health
+    envVars:
+      - key: ASPNETCORE_ENVIRONMENT
+        value: Production
+      - key: JWT_SECRET_KEY
+        generateValue: true
+      - key: JWT_ISSUER
+        value: skfile-blog-system
+      - key: JWT_AUDIENCE
+        value: skfile-blog-users

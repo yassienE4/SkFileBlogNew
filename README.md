@@ -1,5 +1,3 @@
-<img src="https://r2cdn.perplexity.ai/pplx-full-logo-primary-dark%402x.png" class="logo" width="120"/>
-
 # File-Based Blog System
 
 A modern, file-based blog system built with ASP.NET Core 10 Minimal API and a Next.js 14 frontend. This system is designed for robust content publishing, easy administration, and seamless media handling—all without a database.
@@ -72,49 +70,6 @@ This project is a lightweight, production-ready blog platform that stores all co
 - **Frontend:** Next.js 14, TypeScript, Tailwind CSS, shadcn/ui
 - **Markdown or HTML** for content editing
 - **Optimized asset delivery:** Images, CSS, JS
-
-
-## Project Structure
-
-```
-/content
-  /posts
-    /YYYY-MM-DD-post-slug/
-      meta.json       # Post metadata
-      content.md      # Markdown content
-      /assets/        # Post-specific images/files
-  /users
-    /username/
-      profile.json    # User info and roles
-  /categories
-    category-name.json  # Category metadata
-  /tags
-    tag-name.json       # Tag metadata
-/config
-  site.json           # Site configuration
-  routes.json         # Custom route mappings
-/frontend
-  /src
-    /app
-      layout.tsx      # Root layout
-      page.tsx        # Home page
-      /blog
-        page.tsx      # All posts
-        [slug]/       # Post details
-        tags/         # Tag index
-        tags/[slug]/  # Posts by tag
-    /components
-      blog-post-card.tsx
-      tags-section.tsx
-      categories-section.tsx
-      loading-skeletons.tsx
-      ui/
-    /lib
-      api.ts
-    /types
-      blog.ts
-      media.ts
-```
 
 
 ## API Endpoints
@@ -307,63 +262,6 @@ npm run lint     # Run ESLint checks
       {uuid}.json
 ```
 
-
-## TypeScript Interfaces (Frontend)
-
-```typescript
-interface BlogPost {
-  id: string;
-  title: string;
-  slug: string;
-  description: string;
-  content: string;
-  authorId: string;
-  authorName: string;
-  publishedDate: string;
-  modifiedDate: string;
-  status: number;
-  scheduledDate: string | null;
-  tags: string[];
-  categories: string[];
-  customUrl: string | null;
-  assets: any[];
-}
-
-interface Tag {
-  id: string;
-  name: string;
-  slug: string;
-  postCount: number;
-}
-
-interface PaginatedResponse<T> {
-  items: T[];
-  totalCount: number;
-  page: number;
-  pageSize: number;
-  totalPages: number;
-}
-
-export interface MediaFile {
-  id: string;
-  fileName: string;
-  filePath: string;
-  contentType: string;
-  fileSize: number;
-  uploadedBy: string;
-  uploadedDate: string;
-  type: MediaType;
-  imageMetadata?: ImageMetadata;
-}
-
-export enum MediaType {
-  Image = 0,
-  Document = 1,
-  Other = 2
-}
-```
-
-
 ## Contribution
 
 - Follow standard C\# and TypeScript conventions
@@ -371,8 +269,7 @@ export enum MediaType {
 - Use kebab-case for all URLs
 - Submit issues and pull requests via the repository
 
-This README consolidates all major features, usage, and technical details for the file-based blog system, reflecting the most up-to-date implementation and best practices.
-
+  
 <div style="text-align: center">⁂</div>
 
 [^1]: ADMIN_PANEL.md

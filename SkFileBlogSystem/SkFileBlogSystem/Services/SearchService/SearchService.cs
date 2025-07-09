@@ -3,15 +3,8 @@ using SkFileBlogSystem.Models;
 
 namespace SkFileBlogSystem.Services;
 
-public class SearchService : ISearchService
+public class SearchService(IPostService postService) : ISearchService
 {
-    private readonly IPostService _postService;
-
-    public SearchService(IPostService postService)
-    {
-        _postService = postService;
-    }
-
     public async Task<PagedResult<Post>> SearchPostsAsync(string query, int page, int pageSize)
     {
         if (string.IsNullOrWhiteSpace(query))
@@ -20,7 +13,7 @@ public class SearchService : ISearchService
         }
 
         // Get all published posts
-        var allPosts = await _postService.GetPostsAsync(1, int.MaxValue);
+        var allPosts = await postService.GetPostsAsync(1, int.MaxValue);
         
         // Convert query to lowercase for case-insensitive search
         var searchTerms = query.ToLowerInvariant().Split(' ', StringSplitOptions.RemoveEmptyEntries);

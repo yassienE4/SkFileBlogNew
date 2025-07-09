@@ -1,7 +1,7 @@
 import { BlogPostsResponse, TagsResponse, CategoriesResponse, BlogPost, CreatePostRequest, CreatePostResponse, UpdatePostRequest } from '@/types/blog';
 import { RegisterRequest, RegisterResponse, LoginRequest, LoginResponse, UsersResponse, CreateUserRequest, User } from '@/types/auth';
 
-const BASE_URL = 'http:/localhost:5141/api';
+const BASE_URL = 'http://localhost:5141/api';
 
 export async function fetchRecentPosts(page: number = 1, pageSize: number = 10): Promise<BlogPostsResponse> {
   console.log(`Fetching posts: page=${page}, pageSize=${pageSize}`);

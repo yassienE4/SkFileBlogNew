@@ -85,7 +85,8 @@ function MediaManagementContent() {
   };
 
   const getFileUrl = (mediaFile: MediaFile) => {
-    return `${BASE_URL}/media/${mediaFile.filePath}`;
+    const origin = BASE_URL.replace(/\/api\/?$/, '')
+    return `${origin}/media/${mediaFile.filePath}`;
   };
 
   const formatFileSize = (bytes: number) => {

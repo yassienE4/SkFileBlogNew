@@ -62,7 +62,8 @@ export function ImageUpload({
       setMediaFiles(prev => [mediaFile, ...prev]);
       
       if (onImageSelect && mediaFile.type === MediaType.Image) {
-        const imageUrl = `${BASE_URL}/media/${mediaFile.filePath}`;
+        const origin = BASE_URL.replace(/\/api\/?$/, '')
+        const imageUrl = `${origin}/media/${mediaFile.filePath}`;
         onImageSelect(imageUrl);
       }
     } catch (error) {
@@ -97,7 +98,8 @@ export function ImageUpload({
   };
 
   const getFileUrl = (mediaFile: MediaFile) => {
-    return `${BASE_URL}/media/${mediaFile.filePath}`;
+    const origin = BASE_URL.replace(/\/api\/?$/, '')
+    return `${origin}/media/${mediaFile.filePath}`;
   };
 
   const getFileIcon = (mediaFile: MediaFile) => {

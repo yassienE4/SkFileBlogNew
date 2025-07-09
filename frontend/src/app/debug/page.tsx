@@ -12,7 +12,8 @@ export default function DebugPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch(`${BASE_URL}/api/posts?page=1&pageSize=20`);
+        const origin = BASE_URL.replace(/\/api\/?$/, '')
+        const response = await fetch(`${origin}/api/posts?page=1&pageSize=20`);
         const result = await response.json();
         setData(result);
         setLoading(false);

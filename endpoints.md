@@ -24,6 +24,10 @@
 
 ### Media
 - `POST /api/media/upload` - Upload file (requires auth)
+- `GET /api/media` - List media files
+- `GET /api/media/{fileId}` - Get file info
+- `DELETE /api/media/{fileId}` - Delete file
+- `GET /media/{filePath}` - Serve file content
 
 ### Feeds
 - `GET /feed/rss` - RSS feed

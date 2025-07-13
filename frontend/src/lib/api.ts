@@ -3,6 +3,11 @@ import { RegisterRequest, RegisterResponse, LoginRequest, LoginResponse, UsersRe
 import { MediaFile } from '@/types/media';
 
 export const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL!;
+
+// Helper function to get the media base URL (removes /api from BASE_URL if present)
+export const getMediaBaseUrl = () => {
+  return BASE_URL.replace(/\/api\/?$/, '');
+};
 export async function fetchRecentPosts(page: number = 1, pageSize: number = 10): Promise<BlogPostsResponse> {
   console.log(`Fetching posts: page=${page}, pageSize=${pageSize}`);
   const response = await fetch(`${BASE_URL}/posts?page=${page}&pageSize=${pageSize}`, {

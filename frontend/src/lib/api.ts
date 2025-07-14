@@ -11,7 +11,7 @@ export const getMediaBaseUrl = () => {
 export async function fetchRecentPosts(page: number = 1, pageSize: number = 10): Promise<BlogPostsResponse> {
   console.log(`Fetching posts: page=${page}, pageSize=${pageSize}`);
   const response = await fetch(`${BASE_URL}/posts?page=${page}&pageSize=${pageSize}`, {
-    cache: 'no-store', // Keep no cache for now to debug
+    next: { revalidate: 300 }, // Revalidate every 5 minutes
   });
   
   if (!response.ok) {
@@ -25,7 +25,7 @@ export async function fetchRecentPosts(page: number = 1, pageSize: number = 10):
 
 export async function fetchTags(page: number = 1, pageSize: number = 10): Promise<TagsResponse> {
   const response = await fetch(`${BASE_URL}/tags?page=${page}&pageSize=${pageSize}`, {
-    cache: 'no-store', // Disable cache temporarily to get fresh data
+    next: { revalidate: 600 }, // Revalidate every 10 minutes
   });
   
   if (!response.ok) {
@@ -37,7 +37,7 @@ export async function fetchTags(page: number = 1, pageSize: number = 10): Promis
 
 export async function fetchCategories(page: number = 1, pageSize: number = 10): Promise<CategoriesResponse> {
   const response = await fetch(`${BASE_URL}/categories?page=${page}&pageSize=${pageSize}`, {
-    cache: 'no-store', // Disable cache temporarily to get fresh data
+    next: { revalidate: 600 }, // Revalidate every 10 minutes
   });
   
   if (!response.ok) {
@@ -49,7 +49,7 @@ export async function fetchCategories(page: number = 1, pageSize: number = 10): 
 
 export async function fetchPostsByTag(tagSlug: string, page: number = 1, pageSize: number = 10): Promise<BlogPostsResponse> {
   const response = await fetch(`${BASE_URL}/tags/${tagSlug}/posts?page=${page}&pageSize=${pageSize}`, {
-    cache: 'no-store', // Disable cache temporarily to get fresh data
+    next: { revalidate: 300 }, // Revalidate every 5 minutes
   });
   
   if (!response.ok) {
@@ -61,7 +61,7 @@ export async function fetchPostsByTag(tagSlug: string, page: number = 1, pageSiz
 
 export async function fetchPostsByCategory(categorySlug: string, page: number = 1, pageSize: number = 10): Promise<BlogPostsResponse> {
   const response = await fetch(`${BASE_URL}/categories/${categorySlug}/posts?page=${page}&pageSize=${pageSize}`, {
-    cache: 'no-store', // Disable cache temporarily to get fresh data
+    next: { revalidate: 300 }, // Revalidate every 5 minutes
   });
   
   if (!response.ok) {
@@ -178,7 +178,7 @@ export async function fetchAllUsers(authToken: string, page: number = 1, pageSiz
     headers: {
       'Authorization': `Bearer ${authToken}`,
     },
-    cache: 'no-store',
+    next: { revalidate: 60 }, // Revalidate every minute for admin data
   });
 
   if (!response.ok) {

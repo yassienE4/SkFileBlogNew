@@ -1,5 +1,3 @@
-import { revalidateTag } from 'next/cache';
-
 // Cache tags for different data types
 export const CACHE_TAGS = {
   POSTS: 'posts',
@@ -74,14 +72,9 @@ export class DataRefreshManager {
 // Server-side cache invalidation functions
 export async function invalidateServerCache(tags: string[]) {
   if (typeof window === 'undefined') {
-    // Server-side: use Next.js revalidateTag
-    for (const tag of tags) {
-      try {
-        revalidateTag(tag);
-      } catch (error) {
-        console.error(`Failed to revalidate tag ${tag}:`, error);
-      }
-    }
+    // Server-side: use the cache-actions server action
+    const { invalidateCacheTags } = await import('./cache-actions');
+    await invalidateCacheTags(tags);
   }
 }
 

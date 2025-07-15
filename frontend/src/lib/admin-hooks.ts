@@ -9,13 +9,18 @@ export function useAdminDataRefresh(
 ) {
   const manager = DataRefreshManager.getInstance();
   const onRefreshRef = useRef(onRefresh);
+  const activeTabRef = useRef(activeTab);
   
   // Keep the refresh function reference stable
   onRefreshRef.current = onRefresh;
+  activeTabRef.current = activeTab;
 
   useEffect(() => {
     const stableRefresh = () => {
-      onRefreshRef.current();
+      // Only refresh if the tab is still active
+      if (activeTabRef.current === 'posts' || activeTabRef.current === 'users') {
+        onRefreshRef.current();
+      }
     };
 
     let unsubscribePosts: (() => void) | undefined;
@@ -32,7 +37,7 @@ export function useAdminDataRefresh(
       if (unsubscribePosts) unsubscribePosts();
       if (unsubscribeUsers) unsubscribeUsers();
     };
-  }, [activeTab, manager, ...dependencies]);
+  }, [activeTab]); // Only depend on activeTab
 }
 
 // Hook for debounced data loading to prevent excessive API calls
@@ -47,11 +52,13 @@ export function useDebounceDataLoader(
   loadFunctionRef.current = loadFunction;
 
   const debouncedLoad = useCallback(() => {
+    console.log('Admin: Debounced load triggered');
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
     }
 
     timeoutRef.current = setTimeout(() => {
+      console.log('Admin: Executing debounced load');
       loadFunctionRef.current();
     }, delay);
   }, [delay]);

@@ -11,7 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { Pagination } from '@/components/simple-pagination';
 import { fetchAllUsers, createUser, fetchRecentPosts, deletePost } from '@/lib/api';
 import { invalidateAfterPostMutation, invalidateUsersCache } from '@/lib/cache-actions';
-import { useAdminDataRefresh, useDebounceDataLoader, useAdminDataLoader } from '@/lib/admin-hooks';
+import { useAdminDataRefresh, useDebounceDataLoader } from '@/lib/admin-hooks';
 import { getCurrentUserClient, getAuthTokenClient } from '@/lib/auth-client';
 import { User, CreateUserRequest } from '@/types/auth';
 import { BlogPost } from '@/types/blog';
@@ -50,8 +50,12 @@ function AdminPanelContent() {
   }, []);
 
   const loadData = useCallback(async () => {
-    if (!authToken) return;
+    if (!authToken) {
+      console.log('Admin: No auth token, skipping load');
+      return;
+    }
     
+    console.log('Admin: Loading data for tab:', activeTab, 'userPage:', userPage, 'postPage:', postPage);
     setLoading(true);
     setError(null);
     
@@ -97,14 +101,18 @@ function AdminPanelContent() {
     }
   }, [authToken, activeTab, userPage, postPage, pageSize]);
 
-  // Use the stable admin data loader
-  const stableLoadData = useAdminDataLoader(loadData, [authToken, currentUser, activeTab, userPage, postPage]);
+  // Initial data load
+  useEffect(() => {
+    if (authToken && currentUser?.role === 'Admin') {
+      loadData();
+    }
+  }, [authToken, currentUser, activeTab, userPage, postPage, loadData]);
 
-  // Use debounced data loading for refresh events
-  const debouncedLoadData = useDebounceDataLoader(stableLoadData, 300);
+  // Use debounced data loading for refresh events only
+  const debouncedLoadData = useDebounceDataLoader(loadData, 300);
 
   // Subscribe to data refresh events
-  useAdminDataRefresh(activeTab, debouncedLoadData, [authToken]);
+  useAdminDataRefresh(activeTab, debouncedLoadData);
 
   const handleCreateUser = async () => {
     if (!authToken) return;
@@ -123,7 +131,7 @@ function AdminPanelContent() {
       // Trigger cache invalidation for users
       await invalidateUsersCache();
       
-      stableLoadData(); // Use stable reload
+      loadData(); // Reload data
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to create user');
     }
@@ -142,7 +150,7 @@ function AdminPanelContent() {
       // Trigger cache invalidation for comprehensive data refresh
       await invalidateAfterPostMutation(slug);
       
-      stableLoadData(); // Use stable reload
+      loadData(); // Reload data
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to delete post');
     }

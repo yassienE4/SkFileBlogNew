@@ -1,8 +1,9 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { getMediaFiles, deleteMediaFile, getMediaBaseUrl } from '@/lib/api';
+import { getMediaFiles, deleteMediaFile } from '@/lib/api';
 import { getAuthTokenClient } from '@/lib/auth-client';
+import { getMediaUrl } from '@/lib/media-utils';
 import { MediaFile, MediaType } from '@/types/media';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -85,7 +86,8 @@ function MediaManagementContent() {
   };
 
   const getFileUrl = (mediaFile: MediaFile) => {
-    return `${getMediaBaseUrl()}/media/${mediaFile.filePath}`;
+    // Use the frontend proxy URL instead of direct backend URL
+    return getMediaUrl(mediaFile.filePath);
   };
 
   const formatFileSize = (bytes: number) => {

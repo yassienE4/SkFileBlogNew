@@ -1,8 +1,9 @@
 'use client';
 
 import React, { useState, useCallback } from 'react';
-import { uploadFile, getMediaFiles, deleteMediaFile, getMediaBaseUrl } from '@/lib/api';
+import { uploadFile, getMediaFiles, deleteMediaFile } from '@/lib/api';
 import { getAuthTokenClient } from '@/lib/auth-client';
+import { getMediaUrl } from '@/lib/media-utils';
 import { MediaFile, MediaType } from '@/types/media';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -62,7 +63,7 @@ export function ImageUpload({
       setMediaFiles(prev => [mediaFile, ...prev]);
       
       if (onImageSelect && mediaFile.type === MediaType.Image) {
-        const imageUrl = `${getMediaBaseUrl()}/media/${mediaFile.filePath}`;
+        const imageUrl = getMediaUrl(mediaFile.filePath);
         onImageSelect(imageUrl);
       }
     } catch (error) {
@@ -97,7 +98,7 @@ export function ImageUpload({
   };
 
   const getFileUrl = (mediaFile: MediaFile) => {
-    return `${getMediaBaseUrl()}/media/${mediaFile.filePath}`;
+    return getMediaUrl(mediaFile.filePath);
   };
 
   const getFileIcon = (mediaFile: MediaFile) => {

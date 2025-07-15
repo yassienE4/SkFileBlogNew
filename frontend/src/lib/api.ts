@@ -4,9 +4,14 @@ import { MediaFile } from '@/types/media';
 
 export const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL!;
 
-// Helper function to get the media base URL (removes /api from BASE_URL if present)
+// Helper function to get the media base URL - now uses frontend proxy
 export const getMediaBaseUrl = () => {
-  return BASE_URL.replace(/\/api\/?$/, '');
+  // Use the frontend domain for media URLs to avoid ngrok URL changes
+  if (typeof window !== 'undefined') {
+    return window.location.origin;
+  }
+  // For SSR, use the environment variable or default to localhost
+  return process.env.NEXT_PUBLIC_FRONTEND_URL || 'http://localhost:3000';
 };
 export async function fetchRecentPosts(page: number = 1, pageSize: number = 10): Promise<BlogPostsResponse> {
   console.log(`Fetching posts: page=${page}, pageSize=${pageSize}`);

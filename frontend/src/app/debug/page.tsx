@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { getMediaBaseUrl } from '@/lib/api';
+import { BASE_URL } from '@/lib/api';
 
 export default function DebugPage() {
   const [data, setData] = useState<any>(null);
@@ -12,7 +12,7 @@ export default function DebugPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch(`${getMediaBaseUrl()}/api/posts?page=1&pageSize=20`);
+        const response = await fetch(`${BASE_URL}/posts?page=1&pageSize=20`);
         const result = await response.json();
         setData(result);
         setLoading(false);

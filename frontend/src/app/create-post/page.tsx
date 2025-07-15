@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { createPost } from '@/lib/api';
+import { invalidateAfterPostMutation } from '@/lib/cache-actions';
 import { getCurrentUserClient, getAuthTokenClient } from '@/lib/auth-client';
 import { CreatePostRequest } from '@/types/blog';
 import { LoginUser } from '@/types/auth';
@@ -125,8 +126,12 @@ function CreatePostForm() {
       
       const response = await createPost(createData, authToken);
       
+      // Trigger cache invalidation for comprehensive data refresh
+      await invalidateAfterPostMutation(response.slug);
+      
       // Redirect to the newly created post
       router.push(`/blog/${response.slug}`);
+      router.refresh(); // Force refresh to ensure updated data is shown
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to create post');
     } finally {

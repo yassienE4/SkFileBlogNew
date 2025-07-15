@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { updatePost, fetchPostBySlug } from '@/lib/api';
+import { invalidateAfterPostMutation } from '@/lib/cache-actions';
 import { getCurrentUserClient, getAuthTokenClient } from '@/lib/auth-client';
 import { UpdatePostRequest, BlogPost } from '@/types/blog';
 import { LoginUser } from '@/types/auth';
@@ -160,8 +161,12 @@ function EditPostForm({ slug }: { slug: string }) {
       
       const response = await updatePost(slug, updateData, authToken);
       
+      // Trigger cache invalidation for comprehensive data refresh
+      await invalidateAfterPostMutation(response.slug);
+      
       // Redirect to the updated post
       router.push(`/blog/${response.slug}`);
+      router.refresh(); // Force refresh to ensure updated data is shown
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to update post');
     } finally {

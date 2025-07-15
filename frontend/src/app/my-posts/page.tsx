@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { fetchRecentPosts, deletePost } from '@/lib/api';
+import { invalidateAfterPostMutation } from '@/lib/cache-actions';
+import { useDataRefresh } from '@/lib/data-refresh';
 import { getCurrentUserClient, getAuthTokenClient } from '@/lib/auth-client';
 import { BlogPost } from '@/types/blog';
 import { LoginUser } from '@/types/auth';
@@ -22,6 +24,7 @@ import ProtectedRoute from '@/components/protected-route';
 
 function MyPostsContent() {
   const router = useRouter();
+  const { subscribe } = useDataRefresh();
   const [user, setUser] = useState<LoginUser | null>(null);
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -37,7 +40,16 @@ function MyPostsContent() {
     }
     setUser(currentUser);
     loadUserPosts(currentUser.id);
-  }, [router]);
+    
+    // Subscribe to data refresh events
+    const unsubscribe = subscribe('user-posts', () => {
+      if (currentUser) {
+        loadUserPosts(currentUser.id);
+      }
+    });
+    
+    return unsubscribe;
+  }, [router, subscribe]);
 
   const loadUserPosts = async (userId: string) => {
     try {
@@ -68,6 +80,9 @@ function MyPostsContent() {
       }
 
       await deletePost(postToDelete, authToken);
+      
+      // Trigger cache invalidation for comprehensive data refresh
+      await invalidateAfterPostMutation(postToDelete);
       
       // Remove the post from the local state
       setPosts(prev => prev.filter(post => post.slug !== postToDelete));

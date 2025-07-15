@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { deletePost } from '@/lib/api';
+import { invalidateAfterPostMutation } from '@/lib/cache-actions';
 import { getCurrentUserClient, getAuthTokenClient } from '@/lib/auth-client';
 import { Button } from '@/components/ui/button';
 import { Edit, Trash2 } from 'lucide-react';
@@ -48,6 +49,9 @@ export function PostActions({ slug, isOwner, authorId }: PostActionsProps) {
       }
 
       await deletePost(slug, authToken);
+      
+      // Trigger cache invalidation for comprehensive data refresh
+      await invalidateAfterPostMutation(slug);
       
       // Redirect to home page after successful deletion
       router.push('/');

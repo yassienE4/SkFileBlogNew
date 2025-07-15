@@ -10,6 +10,8 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Badge } from '@/components/ui/badge';
 import { Pagination } from '@/components/simple-pagination';
 import { fetchAllUsers, createUser, fetchRecentPosts, deletePost } from '@/lib/api';
+import { invalidateAfterPostMutation, invalidateUsersCache } from '@/lib/cache-actions';
+import { useDataRefresh } from '@/lib/data-refresh';
 import { getCurrentUserClient, getAuthTokenClient } from '@/lib/auth-client';
 import { User, CreateUserRequest } from '@/types/auth';
 import { BlogPost } from '@/types/blog';
@@ -17,6 +19,7 @@ import { Trash2, Users, FileText, UserPlus, Edit, Eye, Image as ImageIcon } from
 import AdminRoute from '@/components/admin-route';
 
 function AdminPanelContent() {
+  const { subscribe } = useDataRefresh();
   const [currentUser, setCurrentUser] = useState(getCurrentUserClient());
   const [authToken, setAuthToken] = useState<string | null>(null);
   const [users, setUsers] = useState<User[]>([]);
@@ -51,7 +54,25 @@ function AdminPanelContent() {
     if (authToken && currentUser?.role === 'Admin') {
       loadData();
     }
-  }, [authToken, currentUser, activeTab, userPage, postPage]);
+    
+    // Subscribe to data refresh events
+    const unsubscribePosts = subscribe('posts', () => {
+      if (activeTab === 'posts' && authToken) {
+        loadData();
+      }
+    });
+    
+    const unsubscribeUsers = subscribe('users', () => {
+      if (activeTab === 'users' && authToken) {
+        loadData();
+      }
+    });
+    
+    return () => {
+      unsubscribePosts();
+      unsubscribeUsers();
+    };
+  }, [authToken, currentUser, activeTab, userPage, postPage, subscribe]);
 
   const loadData = async () => {
     if (!authToken) return;
@@ -114,6 +135,10 @@ function AdminPanelContent() {
         displayName: '',
         role: 'Author',
       });
+      
+      // Trigger cache invalidation for users
+      await invalidateUsersCache();
+      
       loadData(); // Reload users
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to create user');
@@ -129,6 +154,10 @@ function AdminPanelContent() {
     
     try {
       await deletePost(slug, authToken);
+      
+      // Trigger cache invalidation for comprehensive data refresh
+      await invalidateAfterPostMutation(slug);
+      
       loadData(); // Reload posts
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to delete post');

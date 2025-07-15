@@ -1,6 +1,7 @@
 import { BlogPostsResponse, TagsResponse, CategoriesResponse, BlogPost, CreatePostRequest, CreatePostResponse, UpdatePostRequest } from '@/types/blog';
 import { RegisterRequest, RegisterResponse, LoginRequest, LoginResponse, UsersResponse, CreateUserRequest, User } from '@/types/auth';
 import { MediaFile } from '@/types/media';
+import { CACHE_TAGS } from './data-refresh';
 
 export const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL!;
 
@@ -16,7 +17,10 @@ export const getMediaBaseUrl = () => {
 export async function fetchRecentPosts(page: number = 1, pageSize: number = 10): Promise<BlogPostsResponse> {
   console.log(`Fetching posts: page=${page}, pageSize=${pageSize}`);
   const response = await fetch(`${BASE_URL}/posts?page=${page}&pageSize=${pageSize}`, {
-    next: { revalidate: 300 }, // Revalidate every 5 minutes
+    next: { 
+      revalidate: 300, // Revalidate every 5 minutes
+      tags: [CACHE_TAGS.POSTS, CACHE_TAGS.RECENT_POSTS],
+    },
     headers: {
       "ngrok-skip-browser-warning": "true", // Skip ngrok warning in development
     }
@@ -33,7 +37,10 @@ export async function fetchRecentPosts(page: number = 1, pageSize: number = 10):
 
 export async function fetchTags(page: number = 1, pageSize: number = 10): Promise<TagsResponse> {
   const response = await fetch(`${BASE_URL}/tags?page=${page}&pageSize=${pageSize}`, {
-    next: { revalidate: 600 }, // Revalidate every 10 minutes
+    next: { 
+      revalidate: 600, // Revalidate every 10 minutes
+      tags: [CACHE_TAGS.TAGS],
+    },
     headers: {
       "ngrok-skip-browser-warning": "true", // Skip ngrok warning in development
     }
@@ -48,7 +55,10 @@ export async function fetchTags(page: number = 1, pageSize: number = 10): Promis
 
 export async function fetchCategories(page: number = 1, pageSize: number = 10): Promise<CategoriesResponse> {
   const response = await fetch(`${BASE_URL}/categories?page=${page}&pageSize=${pageSize}`, {
-    next: { revalidate: 600 }, // Revalidate every 10 minutes
+    next: { 
+      revalidate: 600, // Revalidate every 10 minutes
+      tags: [CACHE_TAGS.CATEGORIES],
+    },
     headers: {
       "ngrok-skip-browser-warning": "true", // Skip ngrok warning in development
     }
@@ -63,7 +73,10 @@ export async function fetchCategories(page: number = 1, pageSize: number = 10): 
 
 export async function fetchPostsByTag(tagSlug: string, page: number = 1, pageSize: number = 10): Promise<BlogPostsResponse> {
   const response = await fetch(`${BASE_URL}/tags/${tagSlug}/posts?page=${page}&pageSize=${pageSize}`, {
-    next: { revalidate: 300 }, // Revalidate every 5 minutes
+    next: { 
+      revalidate: 300, // Revalidate every 5 minutes
+      tags: [CACHE_TAGS.POSTS, `${CACHE_TAGS.POSTS_BY_TAG}-${tagSlug}`],
+    },
     headers: {
       "ngrok-skip-browser-warning": "true", // Skip ngrok warning in development
     }
@@ -78,8 +91,11 @@ export async function fetchPostsByTag(tagSlug: string, page: number = 1, pageSiz
 
 export async function fetchPostsByCategory(categorySlug: string, page: number = 1, pageSize: number = 10): Promise<BlogPostsResponse> {
   const response = await fetch(`${BASE_URL}/categories/${categorySlug}/posts?page=${page}&pageSize=${pageSize}`, {
-    next: { revalidate: 300 }, // Revalidate every 5 minutes
-     headers: {
+    next: { 
+      revalidate: 300, // Revalidate every 5 minutes
+      tags: [CACHE_TAGS.POSTS, `${CACHE_TAGS.POSTS_BY_CATEGORY}-${categorySlug}`],
+    },
+    headers: {
       "ngrok-skip-browser-warning": "true", // Skip ngrok warning in development
     }
   });
@@ -93,8 +109,11 @@ export async function fetchPostsByCategory(categorySlug: string, page: number = 
 
 export async function fetchPostBySlug(slug: string): Promise<BlogPost> {
   const response = await fetch(`${BASE_URL}/posts/${slug}`, {
-    next: { revalidate: 3600 }, // Revalidate every hour
-     headers: {
+    next: { 
+      revalidate: 3600, // Revalidate every hour
+      tags: [CACHE_TAGS.POSTS, `${CACHE_TAGS.POST_DETAIL}-${slug}`],
+    },
+    headers: {
       "ngrok-skip-browser-warning": "true", // Skip ngrok warning in development
     }
   });
@@ -123,7 +142,16 @@ export async function createPost(data: CreatePostRequest, authToken: string): Pr
     throw new Error(`Failed to create post: ${errorData}`);
   }
 
-  return response.json();
+  const result = await response.json();
+  
+  // Trigger cache invalidation after successful creation
+  if (typeof window !== 'undefined') {
+    // Client-side: trigger cache invalidation
+    const { invalidateAfterPostMutation } = await import('./cache-actions');
+    await invalidateAfterPostMutation(result.slug);
+  }
+
+  return result;
 }
 
 // Post update API
@@ -143,7 +171,16 @@ export async function updatePost(slug: string, data: UpdatePostRequest, authToke
     throw new Error(`Failed to update post: ${errorData}`);
   }
 
-  return response.json();
+  const result = await response.json();
+  
+  // Trigger cache invalidation after successful update
+  if (typeof window !== 'undefined') {
+    // Client-side: trigger cache invalidation
+    const { invalidateAfterPostMutation } = await import('./cache-actions');
+    await invalidateAfterPostMutation(result.slug);
+  }
+
+  return result;
 }
 
 // Post deletion API
@@ -159,6 +196,13 @@ export async function deletePost(slug: string, authToken: string): Promise<void>
   if (!response.ok) {
     const errorData = await response.text();
     throw new Error(`Failed to delete post: ${errorData}`);
+  }
+  
+  // Trigger cache invalidation after successful deletion
+  if (typeof window !== 'undefined') {
+    // Client-side: trigger cache invalidation
+    const { invalidateAfterPostMutation } = await import('./cache-actions');
+    await invalidateAfterPostMutation(slug);
   }
 }
 
@@ -207,7 +251,10 @@ export async function fetchAllUsers(authToken: string, page: number = 1, pageSiz
       'Authorization': `Bearer ${authToken}`,
       "ngrok-skip-browser-warning": "true", // Skip ngrok warning in development
     },
-    next: { revalidate: 60 }, // Revalidate every minute for admin data
+    next: { 
+      revalidate: 60, // Revalidate every minute for admin data
+      tags: [CACHE_TAGS.USERS],
+    },
   });
 
   if (!response.ok) {

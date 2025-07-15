@@ -33,6 +33,7 @@ function CreatePostForm() {
   const [categoryInput, setCategoryInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [titleError, setTitleError] = useState<string | null>(null);
   const [user, setUser] = useState<LoginUser | null>(null);
 
   useEffect(() => {
@@ -44,9 +45,40 @@ function CreatePostForm() {
     setUser(currentUser);
   }, [router]);
 
+  const validateTitle = (title: string): string | null => {
+    if (!title.trim()) {
+      return 'Title is required';
+    }
+    
+    // Check if first character is a letter
+    if (!/^[a-zA-Z]/.test(title.trim())) {
+      return 'Title must start with a letter (A-Z or a-z)';
+    }
+    
+    // Check for invalid characters that would cause URL issues
+    const invalidChars = /[<>:"\\|?*]/;
+    if (invalidChars.test(title)) {
+      return 'Title cannot contain the following characters: < > : " \\ | ? *';
+    }
+    
+    // Check if title starts with a dot
+    if (title.trim().startsWith('.')) {
+      return 'Title cannot start with a dot (.)';
+    }
+    
+    return null;
+  };
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+    
+    // Validate title field
+    if (name === 'title') {
+      const titleValidationError = validateTitle(value);
+      setTitleError(titleValidationError);
+    }
+    
     if (error) setError(null);
   };
 
@@ -110,6 +142,14 @@ function CreatePostForm() {
     setError(null);
 
     try {
+      // Validate title before submission
+      const titleValidationError = validateTitle(formData.title);
+      if (titleValidationError) {
+        setTitleError(titleValidationError);
+        setError('Please fix the title validation errors before submitting.');
+        return;
+      }
+
       // Get auth token from cookies
       const authToken = getAuthTokenClient();
       
@@ -181,7 +221,11 @@ function CreatePostForm() {
                   onChange={handleInputChange}
                   required
                   disabled={isLoading}
+                  className={titleError ? 'border-destructive focus:border-destructive' : ''}
                 />
+                {titleError && (
+                  <p className="text-sm text-destructive">{titleError}</p>
+                )}
               </div>
 
               {/* Description */}
@@ -337,7 +381,7 @@ function CreatePostForm() {
                 </Button>
                 <Button
                   type="submit"
-                  disabled={isLoading}
+                  disabled={isLoading || !!titleError}
                 >
                   {isLoading ? 'Creating...' : 'Create Post'}
                 </Button>

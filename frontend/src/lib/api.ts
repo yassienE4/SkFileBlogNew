@@ -12,20 +12,26 @@ export async function fetchRecentPosts(page: number = 1, pageSize: number = 10):
   console.log(`Fetching posts: page=${page}, pageSize=${pageSize}`);
   const response = await fetch(`${BASE_URL}/posts?page=${page}&pageSize=${pageSize}`, {
     next: { revalidate: 300 }, // Revalidate every 5 minutes
+    headers: {
+      "ngrok-skip-browser-warning": "true", // Skip ngrok warning in development
+    }
   });
   
   if (!response.ok) {
     throw new Error('Failed to fetch posts');
-  }
-  
+  } 
+  // const rawResponse = await response.text();
+  // console.log('Raw posts API response:', rawResponse);
   const data = await response.json();
-  console.log('Posts API response:', data);
   return data;
 }
 
 export async function fetchTags(page: number = 1, pageSize: number = 10): Promise<TagsResponse> {
   const response = await fetch(`${BASE_URL}/tags?page=${page}&pageSize=${pageSize}`, {
     next: { revalidate: 600 }, // Revalidate every 10 minutes
+    headers: {
+      "ngrok-skip-browser-warning": "true", // Skip ngrok warning in development
+    }
   });
   
   if (!response.ok) {
@@ -38,6 +44,9 @@ export async function fetchTags(page: number = 1, pageSize: number = 10): Promis
 export async function fetchCategories(page: number = 1, pageSize: number = 10): Promise<CategoriesResponse> {
   const response = await fetch(`${BASE_URL}/categories?page=${page}&pageSize=${pageSize}`, {
     next: { revalidate: 600 }, // Revalidate every 10 minutes
+    headers: {
+      "ngrok-skip-browser-warning": "true", // Skip ngrok warning in development
+    }
   });
   
   if (!response.ok) {
@@ -50,6 +59,9 @@ export async function fetchCategories(page: number = 1, pageSize: number = 10): 
 export async function fetchPostsByTag(tagSlug: string, page: number = 1, pageSize: number = 10): Promise<BlogPostsResponse> {
   const response = await fetch(`${BASE_URL}/tags/${tagSlug}/posts?page=${page}&pageSize=${pageSize}`, {
     next: { revalidate: 300 }, // Revalidate every 5 minutes
+    headers: {
+      "ngrok-skip-browser-warning": "true", // Skip ngrok warning in development
+    }
   });
   
   if (!response.ok) {
@@ -62,6 +74,9 @@ export async function fetchPostsByTag(tagSlug: string, page: number = 1, pageSiz
 export async function fetchPostsByCategory(categorySlug: string, page: number = 1, pageSize: number = 10): Promise<BlogPostsResponse> {
   const response = await fetch(`${BASE_URL}/categories/${categorySlug}/posts?page=${page}&pageSize=${pageSize}`, {
     next: { revalidate: 300 }, // Revalidate every 5 minutes
+     headers: {
+      "ngrok-skip-browser-warning": "true", // Skip ngrok warning in development
+    }
   });
   
   if (!response.ok) {
@@ -74,6 +89,9 @@ export async function fetchPostsByCategory(categorySlug: string, page: number = 
 export async function fetchPostBySlug(slug: string): Promise<BlogPost> {
   const response = await fetch(`${BASE_URL}/posts/${slug}`, {
     next: { revalidate: 3600 }, // Revalidate every hour
+     headers: {
+      "ngrok-skip-browser-warning": "true", // Skip ngrok warning in development
+    }
   });
   
   if (!response.ok) {
@@ -90,6 +108,7 @@ export async function createPost(data: CreatePostRequest, authToken: string): Pr
     headers: {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${authToken}`,
+      "ngrok-skip-browser-warning": "true", // Skip ngrok warning in development
     },
     body: JSON.stringify(data),
   });
@@ -109,6 +128,7 @@ export async function updatePost(slug: string, data: UpdatePostRequest, authToke
     headers: {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${authToken}`,
+      "ngrok-skip-browser-warning": "true", // Skip ngrok warning in development
     },
     body: JSON.stringify(data),
   });
@@ -127,6 +147,7 @@ export async function deletePost(slug: string, authToken: string): Promise<void>
     method: 'DELETE',
     headers: {
       'Authorization': `Bearer ${authToken}`,
+      "ngrok-skip-browser-warning": "true", // Skip ngrok warning in development
     },
   });
 
@@ -142,6 +163,7 @@ export async function register(data: RegisterRequest): Promise<RegisterResponse>
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
+      "ngrok-skip-browser-warning": "true", // Skip ngrok warning in development
     },
     body: JSON.stringify(data),
   });
@@ -159,6 +181,7 @@ export async function login(data: LoginRequest): Promise<LoginResponse> {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
+      "ngrok-skip-browser-warning": "true", // Skip ngrok warning in development
     },
     body: JSON.stringify(data),
   });
@@ -177,6 +200,7 @@ export async function fetchAllUsers(authToken: string, page: number = 1, pageSiz
   const response = await fetch(`${BASE_URL}/users?page=${page}&pageSize=${pageSize}`, {
     headers: {
       'Authorization': `Bearer ${authToken}`,
+      "ngrok-skip-browser-warning": "true", // Skip ngrok warning in development
     },
     next: { revalidate: 60 }, // Revalidate every minute for admin data
   });
@@ -225,6 +249,7 @@ export async function createUser(data: CreateUserRequest, authToken: string): Pr
     headers: {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${authToken}`,
+      "ngrok-skip-browser-warning": "true", // Skip ngrok warning in development
     },
     body: JSON.stringify(data),
   });
@@ -243,6 +268,7 @@ export async function updateUserStatus(userId: string, isActive: boolean, authTo
     headers: {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${authToken}`,
+      "ngrok-skip-browser-warning": "true", // Skip ngrok warning in development
     },
     body: JSON.stringify({ isActive }),
   });
@@ -258,6 +284,7 @@ export async function deleteUser(userId: string, authToken: string): Promise<voi
     method: 'DELETE',
     headers: {
       'Authorization': `Bearer ${authToken}`,
+      "ngrok-skip-browser-warning": "true", // Skip ngrok warning in development
     },
   });
 
@@ -276,6 +303,7 @@ export async function uploadFile(file: File, authToken: string): Promise<MediaFi
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${authToken}`,
+      "ngrok-skip-browser-warning": "true", // Skip ngrok warning in development
     },
     body: formData,
   });
@@ -293,6 +321,7 @@ export async function getMediaFiles(authToken: string): Promise<MediaFile[]> {
   const response = await fetch(`${BASE_URL}/media`, {
     headers: {
       'Authorization': `Bearer ${authToken}`,
+      "ngrok-skip-browser-warning": "true", // Skip ngrok warning in development
     },
   });
 
@@ -310,6 +339,7 @@ export async function deleteMediaFile(fileId: string, authToken: string): Promis
     method: 'DELETE',
     headers: {
       'Authorization': `Bearer ${authToken}`,
+      "ngrok-skip-browser-warning": "true", // Skip ngrok warning in development
     },
   });
 

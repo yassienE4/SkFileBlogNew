@@ -8,14 +8,13 @@ It shows up uninvited, hypes you up with a thousand ideas, and then *disappears*
 
 One week you're unstoppable.  
 The next, you're stuck in a YouTube rabbit hole wondering why you even started.
-
-Sound familiar?
-
 Here’s the thing: **consistency beats motivation**. Always.
 
 Let’s talk about how to *actually* show up every day — even when you don’t feel like it.
 ---
-![Image](https://589d01d8f1c1.ngrok-free.app/media/2025-07/20aa3fd8-4b9f-4b2e-97b6-04f1d9660c74.jpg)
+
+![Image](https://sk-file-blog-frontend.vercel.app/api/media/2025-07/f38f2f3f-e5da-4143-9326-af303a2da667.jpg)
+
 ---
 
 ## 1. **Set Lower Expectations**

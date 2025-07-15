@@ -1,6 +1,7 @@
 # Why Most Side Projects Fail — And How to Beat the Odds 💡
 
-![Image](https://589d01d8f1c1.ngrok-free.app/media/2025-07/c53b27c8-9813-449d-93dc-bfe6af3fdb46.png)
+![Image](https://sk-file-blog-frontend.vercel.app/api/media/2025-07/7c635e31-7de5-44c5-8338-ea50337b4d68.png)
+
 
 Let’s face it — we all get that spark.
 

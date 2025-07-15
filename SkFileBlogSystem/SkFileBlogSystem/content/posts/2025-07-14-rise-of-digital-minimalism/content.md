@@ -7,7 +7,7 @@ In today’s hyper-connected world, where attention is currency and our devices 
 Digital minimalism is not about throwing away your phone or swearing off the internet. Instead, it’s about **intentionality**—rethinking your relationship with technology to ensure it supports rather than sabotages your values, goals, and well-being.
 
 
-![Image](http://localhost:5141/media/2025-07/adede4d5-6205-4927-908e-12b223a7fe53.jpg)
+![Image](https://sk-file-blog-frontend.vercel.app/media/2025-07/adede4d5-6205-4927-908e-12b223a7fe53.jpg)
 ---
 
 ## The Attention Economy and the Need for Change

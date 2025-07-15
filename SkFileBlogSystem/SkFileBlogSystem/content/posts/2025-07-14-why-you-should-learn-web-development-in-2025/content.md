@@ -6,7 +6,7 @@
 
 Understanding both gives you superpowers. 💪
 
-![Image](http://localhost:5141/media/2025-07/ee44135a-5645-4df4-bc68-83aff91008b6.jpeg)
+![Image](https://sk-file-blog-frontend.vercel.app/media/2025-07/ee44135a-5645-4df4-bc68-83aff91008b6.jpeg)
 
 
 ## 📈 Trends to Watch in 2025

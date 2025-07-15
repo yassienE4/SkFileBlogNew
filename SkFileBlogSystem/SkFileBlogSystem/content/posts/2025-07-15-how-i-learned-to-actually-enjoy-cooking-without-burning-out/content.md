@@ -2,6 +2,7 @@
 
 ![Image](https://sk-file-blog-frontend.vercel.app/api/media/2025-07/0f2b6ea2-0496-4b0f-afac-4c4554697a49.jpg)
 
+
 Let me confess something:  
 I used to *hate* cooking.
 

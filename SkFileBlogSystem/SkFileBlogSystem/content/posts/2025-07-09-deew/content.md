@@ -1,1 +1,0 @@
-eee![Image](http://localhost:5141/media/2025-07/7a6077ae-a933-4ea1-b6cf-2cfe0e219bf3.jpeg)

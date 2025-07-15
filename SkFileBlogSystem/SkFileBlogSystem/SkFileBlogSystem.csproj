@@ -26,6 +26,19 @@
 
     <ItemGroup>
       <_ContentIncludedByDefault Remove="content\users\admin\profile.json" />
+      <_ContentIncludedByDefault Remove="content\posts\2025-07-01-111\meta.json" />
+      <_ContentIncludedByDefault Remove="content\posts\2025-07-01-test2\meta.json" />
+      <_ContentIncludedByDefault Remove="content\posts\2025-07-03-dummy-post\meta.json" />
+      <_ContentIncludedByDefault Remove="content\posts\2025-07-03-tesr\meta.json" />
+      <_ContentIncludedByDefault Remove="content\posts\2025-07-03-test-schedule-again\meta.json" />
+      <_ContentIncludedByDefault Remove="content\posts\2025-07-03-testing-admin-panel\meta.json" />
+      <_ContentIncludedByDefault Remove="content\posts\2025-07-13-wow\meta.json" />
+      <_ContentIncludedByDefault Remove="content\users\abdullah\profile.json" />
+      <_ContentIncludedByDefault Remove="content\users\secondadmin\profile.json" />
+      <_ContentIncludedByDefault Remove="content\users\johnny\profile.json" />
+      <_ContentIncludedByDefault Remove="content\users\johndoe\profile.json" />
+      <_ContentIncludedByDefault Remove="content\users\displaynametest\profile.json" />
+      <_ContentIncludedByDefault Remove="content\users\testuser\profile.json" />
     </ItemGroup>
 
 </Project>

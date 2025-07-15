@@ -4,11 +4,14 @@ const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL!;
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { path: string[] } }
+  { params }: { params: Promise<{ path: string[] }> }
 ) {
   try {
+    // Await the params since it's a Promise in Next.js 13+
+    const { path } = await params;
+    
     // Reconstruct the file path from the dynamic route segments
-    const filePath = params.path.join('/');
+    const filePath = path.join('/');
     
     // Get the backend media URL (remove /api suffix if present)
     const mediaBaseUrl = BASE_URL.replace(/\/api\/?$/, '');

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { markdownToHtml, isMarkdown } from '@/lib/markdown';
 import { MarkdownGuide } from '@/components/markdown-guide';
 import { ImageUpload } from '@/components/image-upload';
@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { ImageIcon } from 'lucide-react';
+import { ImageIcon, RefreshCw } from 'lucide-react';
 
 interface MarkdownPreviewProps {
   content: string;
@@ -28,13 +28,16 @@ export function MarkdownPreview({
   const [previewHtml, setPreviewHtml] = useState<string>('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [showImageUpload, setShowImageUpload] = useState(false);
+  const [lastProcessedContent, setLastProcessedContent] = useState<string>('');
+  const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  const handlePreview = async () => {
-    if (activeTab === 'preview' && !previewHtml) {
+  const handlePreview = async (forceUpdate = false) => {
+    if (activeTab === 'preview' && (forceUpdate || content !== lastProcessedContent)) {
       setIsProcessing(true);
       try {
         const html = await markdownToHtml(content);
         setPreviewHtml(html);
+        setLastProcessedContent(content);
       } catch (error) {
         console.error('Error processing markdown:', error);
       } finally {
@@ -42,6 +45,34 @@ export function MarkdownPreview({
       }
     }
   };
+
+  const debouncedHandlePreview = () => {
+    if (debounceTimeoutRef.current) {
+      clearTimeout(debounceTimeoutRef.current);
+    }
+    
+    debounceTimeoutRef.current = setTimeout(() => {
+      handlePreview();
+    }, 300); // 300ms debounce
+  };
+
+  // Effect to handle tab changes and content updates
+  useEffect(() => {
+    if (activeTab === 'preview') {
+      if (content !== lastProcessedContent) {
+        debouncedHandlePreview();
+      }
+    }
+  }, [activeTab, content]);
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (debounceTimeoutRef.current) {
+        clearTimeout(debounceTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const insertMarkdown = (before: string, after: string = '', placeholder: string = '') => {
     if (readonly || !onChange) return;
@@ -105,12 +136,6 @@ export function MarkdownPreview({
     { label: 'Header', action: () => insertMarkdown('## ', '', 'header'), icon: 'H' },
   ];
 
-  React.useEffect(() => {
-    if (activeTab === 'preview') {
-      handlePreview();
-    }
-  }, [activeTab, content]);
-
   return (
     <Card>
       <CardHeader>
@@ -123,25 +148,39 @@ export function MarkdownPreview({
               </Badge>
             )}
             {showPreview && (
-              <div className="flex border rounded-md">
-                <Button
-                  type="button"
-                  variant={activeTab === 'edit' ? 'default' : 'ghost'}
-                  size="sm"
-                  onClick={() => setActiveTab('edit')}
-                  className="rounded-r-none"
-                >
-                  Edit
-                </Button>
-                <Button
-                  type="button"
-                  variant={activeTab === 'preview' ? 'default' : 'ghost'}
-                  size="sm"
-                  onClick={() => setActiveTab('preview')}
-                  className="rounded-l-none"
-                >
-                  Preview
-                </Button>
+              <div className="flex items-center gap-2">
+                <div className="flex border rounded-md">
+                  <Button
+                    type="button"
+                    variant={activeTab === 'edit' ? 'default' : 'ghost'}
+                    size="sm"
+                    onClick={() => setActiveTab('edit')}
+                    className="rounded-r-none"
+                  >
+                    Edit
+                  </Button>
+                  <Button
+                    type="button"
+                    variant={activeTab === 'preview' ? 'default' : 'ghost'}
+                    size="sm"
+                    onClick={() => setActiveTab('preview')}
+                    className="rounded-l-none"
+                  >
+                    Preview
+                  </Button>
+                </div>
+                {activeTab === 'preview' && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handlePreview(true)}
+                    disabled={isProcessing}
+                    title="Refresh preview"
+                  >
+                    <RefreshCw className={`h-4 w-4 ${isProcessing ? 'animate-spin' : ''}`} />
+                  </Button>
+                )}
               </div>
             )}
           </div>

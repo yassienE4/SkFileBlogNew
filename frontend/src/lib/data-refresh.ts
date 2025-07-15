@@ -1,3 +1,5 @@
+import { useMemo } from 'react';
+
 // Cache tags for different data types
 export const CACHE_TAGS = {
   POSTS: 'posts',
@@ -172,10 +174,11 @@ export const refreshFunctions = {
 export function useDataRefresh() {
   const manager = DataRefreshManager.getInstance();
   
-  return {
-    subscribe: manager.subscribe.bind(manager),
-    notify: manager.notify.bind(manager),
-    notifyMultiple: manager.notifyMultiple.bind(manager),
+  // Use useMemo to prevent the object from changing on every render
+  return useMemo(() => ({
+    subscribe: (key: string, callback: () => void) => manager.subscribe(key, callback),
+    notify: (key: string) => manager.notify(key),
+    notifyMultiple: (keys: string[]) => manager.notifyMultiple(keys),
     refreshFunctions,
-  };
+  }), []); // Empty dependency array since manager is singleton
 }

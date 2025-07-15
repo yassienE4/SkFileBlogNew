@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,7 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { Pagination } from '@/components/simple-pagination';
 import { fetchAllUsers, createUser, fetchRecentPosts, deletePost } from '@/lib/api';
 import { invalidateAfterPostMutation, invalidateUsersCache } from '@/lib/cache-actions';
-import { useDataRefresh } from '@/lib/data-refresh';
+import { useAdminDataRefresh, useDebounceDataLoader, useAdminDataLoader } from '@/lib/admin-hooks';
 import { getCurrentUserClient, getAuthTokenClient } from '@/lib/auth-client';
 import { User, CreateUserRequest } from '@/types/auth';
 import { BlogPost } from '@/types/blog';
@@ -19,7 +19,6 @@ import { Trash2, Users, FileText, UserPlus, Edit, Eye, Image as ImageIcon } from
 import AdminRoute from '@/components/admin-route';
 
 function AdminPanelContent() {
-  const { subscribe } = useDataRefresh();
   const [currentUser, setCurrentUser] = useState(getCurrentUserClient());
   const [authToken, setAuthToken] = useState<string | null>(null);
   const [users, setUsers] = useState<User[]>([]);
@@ -50,31 +49,7 @@ function AdminPanelContent() {
     setAuthToken(token);
   }, []);
 
-  useEffect(() => {
-    if (authToken && currentUser?.role === 'Admin') {
-      loadData();
-    }
-    
-    // Subscribe to data refresh events
-    const unsubscribePosts = subscribe('posts', () => {
-      if (activeTab === 'posts' && authToken) {
-        loadData();
-      }
-    });
-    
-    const unsubscribeUsers = subscribe('users', () => {
-      if (activeTab === 'users' && authToken) {
-        loadData();
-      }
-    });
-    
-    return () => {
-      unsubscribePosts();
-      unsubscribeUsers();
-    };
-  }, [authToken, currentUser, activeTab, userPage, postPage, subscribe]);
-
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     if (!authToken) return;
     
     setLoading(true);
@@ -120,7 +95,16 @@ function AdminPanelContent() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [authToken, activeTab, userPage, postPage, pageSize]);
+
+  // Use the stable admin data loader
+  const stableLoadData = useAdminDataLoader(loadData, [authToken, currentUser, activeTab, userPage, postPage]);
+
+  // Use debounced data loading for refresh events
+  const debouncedLoadData = useDebounceDataLoader(stableLoadData, 300);
+
+  // Subscribe to data refresh events
+  useAdminDataRefresh(activeTab, debouncedLoadData, [authToken]);
 
   const handleCreateUser = async () => {
     if (!authToken) return;
@@ -139,7 +123,7 @@ function AdminPanelContent() {
       // Trigger cache invalidation for users
       await invalidateUsersCache();
       
-      loadData(); // Reload users
+      stableLoadData(); // Use stable reload
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to create user');
     }
@@ -158,7 +142,7 @@ function AdminPanelContent() {
       // Trigger cache invalidation for comprehensive data refresh
       await invalidateAfterPostMutation(slug);
       
-      loadData(); // Reload posts
+      stableLoadData(); // Use stable reload
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to delete post');
     }

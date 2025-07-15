@@ -1,4 +1,4 @@
-import { useEffect, useCallback } from 'react';
+import { useEffect, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useDataRefresh } from './data-refresh';
 import { invalidateAfterPostMutation } from './cache-actions';
@@ -19,12 +19,12 @@ export function useAutoRefresh() {
     forceRefresh();
   }, [forceRefresh]);
 
-  return {
+  return useMemo(() => ({
     subscribe,
     forceRefresh,
     refreshAfterPostMutation,
     refreshFunctions,
-  };
+  }), [subscribe, forceRefresh, refreshAfterPostMutation, refreshFunctions]);
 }
 
 // Hook for components that display posts

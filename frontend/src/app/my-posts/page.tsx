@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { fetchRecentPosts, deletePost } from '@/lib/api';
 import { invalidateAfterPostMutation } from '@/lib/cache-actions';
@@ -32,26 +32,7 @@ function MyPostsContent() {
   const [postToDelete, setPostToDelete] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  useEffect(() => {
-    const currentUser = getCurrentUserClient();
-    if (!currentUser) {
-      router.push('/login');
-      return;
-    }
-    setUser(currentUser);
-    loadUserPosts(currentUser.id);
-    
-    // Subscribe to data refresh events
-    const unsubscribe = subscribe('user-posts', () => {
-      if (currentUser) {
-        loadUserPosts(currentUser.id);
-      }
-    });
-    
-    return unsubscribe;
-  }, [router, subscribe]);
-
-  const loadUserPosts = async (userId: string) => {
+  const loadUserPosts = useCallback(async (userId: string) => {
     try {
       // Fetch all posts and filter by current user
       const response = await fetchRecentPosts(1, 100); // Get more posts to find user's posts
@@ -62,7 +43,28 @@ function MyPostsContent() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    const currentUser = getCurrentUserClient();
+    if (!currentUser) {
+      router.push('/login');
+      return;
+    }
+    setUser(currentUser);
+    loadUserPosts(currentUser.id);
+  }, [router, loadUserPosts]);
+
+  useEffect(() => {
+    if (!user) return;
+
+    // Subscribe to data refresh events
+    const unsubscribe = subscribe('user-posts', () => {
+      loadUserPosts(user.id);
+    });
+    
+    return unsubscribe;
+  }, [user, loadUserPosts]); // Remove subscribe from dependencies
 
   const handleDeleteClick = (slug: string) => {
     setPostToDelete(slug);

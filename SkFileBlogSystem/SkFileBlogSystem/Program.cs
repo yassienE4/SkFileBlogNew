@@ -19,20 +19,7 @@ builder.Services.AddSwaggerGen(c =>
         Version = "v1" 
     });
 });
-builder.Services.AddCors(options =>
-{
-    options.AddDefaultPolicy(policy =>
-    {
-        policy
-            .WithOrigins(
-                "http://localhost:3000",           // local dev frontend
-                "https://sk-file-blog-frontend.vercel.app/"       // your actual domain (if deployed)
-            )
-            .AllowAnyMethod()
-            .AllowAnyHeader();
-    });
-});
-
+builder.Services.AddCors();
 
 // Configure JWT authentication
 var jwtSettings = builder.Configuration.GetSection("JwtSettings");
@@ -97,7 +84,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-app.UseCors();
+app.UseCors(x => x.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
 app.UseAuthentication();
 app.UseAuthorization();
 
@@ -296,9 +283,7 @@ app.MapGet("/media/{*filePath}", async (string filePath, IMediaService mediaServ
     if (file == null)
         return Results.NotFound();
 
-    // return Results.Stream(file.Value.Stream, file.Value.ContentType, file.Value.FileName);
-    return Results.Stream(file.Value.Stream, file.Value.ContentType);
-
+    return Results.Stream(file.Value.Stream, file.Value.ContentType, file.Value.FileName);
 })
 .WithName("ServeMedia");
 

@@ -23,10 +23,14 @@ public class FeedService : IFeedService
         {
             var json = File.ReadAllText(configPath);
             _siteConfig = JsonSerializer.Deserialize<SiteConfiguration>(json) ?? new SiteConfiguration();
+            _siteConfig.SiteUrl = "https://sk-file-blog-frontend.vercel.app/";
+            _siteConfig.SiteName = "SK Blog";
         }
         else
         {
             _siteConfig = new SiteConfiguration();
+            _siteConfig.SiteUrl = "https://sk-file-blog-frontend.vercel.app/";
+            _siteConfig.SiteName = "SK Blog";
         }
     }
 
@@ -45,12 +49,12 @@ public class FeedService : IFeedService
                 new XElement("lastBuildDate", DateTime.UtcNow.ToString("R")),
                 posts.Items.Select(post => new XElement("item",
                     new XElement("title", post.Title),
-                    new XElement("link", $"{_siteConfig.SiteUrl}/posts/{post.Slug}"),
+                    new XElement("link", $"{_siteConfig.SiteUrl}/blog/{post.Slug}"),
                     new XElement("description", post.Description),
                     new XElement("content:encoded", 
                         new XCData(Markdown.ToHtml(post.Content, markdown))),
                     new XElement("pubDate", post.PublishedDate.ToString("R")),
-                    new XElement("guid", $"{_siteConfig.SiteUrl}/posts/{post.Slug}"),
+                    new XElement("guid", $"{_siteConfig.SiteUrl}/blog/{post.Slug}"),
                     post.Categories.Select(cat => new XElement("category", cat))
                 ))
             )
@@ -65,7 +69,6 @@ public class FeedService : IFeedService
         var markdown = new MarkdownPipelineBuilder().UseAdvancedExtensions().Build();
 
         XNamespace atom = "http://www.w3.org/2005/Atom";
-
         var feed = new XElement(atom + "feed",
             new XElement(atom + "title", _siteConfig.SiteName),
             new XElement(atom + "link", 
@@ -80,8 +83,8 @@ public class FeedService : IFeedService
             posts.Items.Select(post => new XElement(atom + "entry",
                 new XElement(atom + "title", post.Title),
                 new XElement(atom + "link",
-                    new XAttribute("href", $"{_siteConfig.SiteUrl}/posts/{post.Slug}")),
-                new XElement(atom + "id", $"{_siteConfig.SiteUrl}/posts/{post.Slug}"),
+                    new XAttribute("href", $"{_siteConfig.SiteUrl}/blog/{post.Slug}")),
+                new XElement(atom + "id", $"{_siteConfig.SiteUrl}/blog/{post.Slug}"),
                 new XElement(atom + "updated", post.ModifiedDate.ToString("yyyy-MM-dd'T'HH:mm:ss'Z'")),
                 new XElement(atom + "published", post.PublishedDate.ToString("yyyy-MM-dd'T'HH:mm:ss'Z'")),
                 new XElement(atom + "author",

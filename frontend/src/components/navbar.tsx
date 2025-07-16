@@ -14,7 +14,8 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { LoginUser } from '@/types/auth';
-import { User, Settings, FileText, Shield, LogOut, ChevronDown } from 'lucide-react';
+import { User, Settings, FileText, Shield, LogOut, ChevronDown, Rss } from 'lucide-react';
+import { getFeedUrl } from '@/lib/api';
 
 export function Navbar() {
   const router = useRouter();
@@ -72,6 +73,16 @@ export function Navbar() {
               <Link href="/about" className="text-muted-foreground hover:text-foreground transition-colors">
                 About
               </Link>
+              <a 
+                href={getFeedUrl()} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
+                title="RSS Feed"
+              >
+                <Rss className="h-4 w-4" />
+                Feed
+              </a>
             </div>
           </div>
 

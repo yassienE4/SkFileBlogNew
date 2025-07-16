@@ -14,6 +14,13 @@ export const getMediaBaseUrl = () => {
   // For SSR, use the environment variable or default to localhost
   return process.env.NEXT_PUBLIC_FRONTEND_URL || 'http://localhost:3000';
 };
+
+// Helper function to get the feed URL
+export const getFeedUrl = () => {
+  const baseUrl = BASE_URL.replace(/\/api\/?$/, '');
+  return `${baseUrl}/feed/atom`;
+};
+
 export async function fetchRecentPosts(page: number = 1, pageSize: number = 10): Promise<BlogPostsResponse> {
   console.log(`Fetching posts: page=${page}, pageSize=${pageSize}`);
   const response = await fetch(`${BASE_URL}/posts?page=${page}&pageSize=${pageSize}`, {

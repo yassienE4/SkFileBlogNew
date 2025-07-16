@@ -1,0 +1,18 @@
+{
+  "Id": "a8a6c107-8acc-46d4-882f-47f4f23ea368",
+  "FileName": "unnamed-3.jpg",
+  "FilePath": "2025-07/a8a6c107-8acc-46d4-882f-47f4f23ea368.jpg",
+  "ContentType": "image/jpeg",
+  "FileSize": 259669,
+  "UploadedBy": "5d6a138e-dcef-4946-93d3-7562b9e7ce82",
+  "UploadedDate": "2025-07-16T10:47:40.616589Z",
+  "Type": 0,
+  "ImageMetadata": {
+    "Width": 960,
+    "Height": 1280,
+    "ResizedVersions": {
+      "300w": "a8a6c107-8acc-46d4-882f-47f4f23ea368-300w.jpg",
+      "600w": "a8a6c107-8acc-46d4-882f-47f4f23ea368-600w.jpg"
+    }
+  }
+}

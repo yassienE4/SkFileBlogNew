@@ -89,7 +89,7 @@ jobs:
             --insecure \
             --grpc-web \
             --username admin \
-            --password "${{ secrets.ARGOCD_PASSWORD }}"
+            --password pwy5T8UHZeiLBRGW
 
       - name: Ensure ArgoCD repo and app
         run: |

@@ -104,7 +104,7 @@ jobs:
 
           argocd app create "$app_name" \
             --repo "$repo" \
-            --path charts/skfileblognew \
+            --path charts/SkFileBlogNew \
             --dest-namespace dev \
             --dest-server https://kubernetes.default.svc \
             --values values-dev.yaml \

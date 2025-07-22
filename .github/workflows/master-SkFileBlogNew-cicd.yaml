@@ -66,8 +66,8 @@ jobs:
 
       - name: Commit and push changes manually
         run: |
-          git config user.name "MariamElkamhawySK"
-          git config user.email "MariamElkamhawySK@users.noreply.github.com"
+          git config user.name "yassienE4"
+          git config user.email "yassienE4K@users.noreply.github.com"
           git add charts/SkFileBlogNew/values-dev.yaml
           git commit -m "Updates values.yaml with commit ${{ needs.ci.outputs.commit_id }}" || echo "No changes to commit"
           git pull origin master --rebase

@@ -94,7 +94,7 @@ jobs:
       - name: Ensure ArgoCD repo and app
         run: |
           repo="https://github.com/yassienE4/SkFileBlogNew.git"
-          repo_url="https://x-access-token:${{ secrets.GIT_TOKEN }}@github.com/yassienE4/SkFileBlogNew.git"
+          repo_url="https://x-access-token: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@github.com/yassienE4/SkFileBlogNew.git"
           app_name="master-SkFileBlogNew"
 
           argocd repo add "$repo_url" --type git --name SkFileBlogNew-repo || true

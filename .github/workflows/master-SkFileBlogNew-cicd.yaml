@@ -64,17 +64,18 @@ jobs:
             .image.tag = "${{ needs.ci.outputs.commit_id }}"
           ' charts/SkFileBlogNew/values-dev.yaml
 
-      - name: Commit and push changes manually
+      - name: Commit and push changes using personal access token
         env:
           GIT_TOKEN: ${{ secrets.GIT_TOKEN }}
         run: |
           git config --global --unset credential.helper || true
-          git config user.name "yassienE4"
-          git config user.email "yassienE4K@users.noreply.github.com"
+          git config --global user.name "yassienE4"
+          git config --global user.email "yassienE4K@users.noreply.github.com"
           git add charts/SkFileBlogNew/values-dev.yaml
           git commit -m "Updates values.yaml with commit ${{ needs.ci.outputs.commit_id }}" || echo "No changes to commit"
-          git pull https://x-access-token:${GIT_TOKEN}@github.com/yassienE4/SkFileBlogNew.git master --rebase
-          git push https://x-access-token:${GIT_TOKEN}@github.com/yassienE4/SkFileBlogNew.git HEAD:master
+          git remote set-url origin https://x-access-token:${GIT_TOKEN}@github.com/yassienE4/SkFileBlogNew.git
+          git pull origin master --rebase
+          git push origin master
 
       - name: Install ArgoCD CLI
         run: |

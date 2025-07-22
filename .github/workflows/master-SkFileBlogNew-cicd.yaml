@@ -110,7 +110,8 @@ jobs:
             --values values-dev.yaml \
             --revision master \
             --sync-policy manual \
-            --sync-option CreateNamespace=true || true
+            --sync-option CreateNamespace=true \
+             --upsert || true
 
       - name: ArgoCD app sync
         run: |

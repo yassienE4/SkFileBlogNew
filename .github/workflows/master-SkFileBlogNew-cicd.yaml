@@ -111,7 +111,7 @@ jobs:
             --revision master \
             --sync-policy manual \
             --sync-option CreateNamespace=true \
-             --upsert || true
+            --upsert || true
 
       - name: ArgoCD app sync
         run: |

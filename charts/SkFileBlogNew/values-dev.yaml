@@ -1,5 +1,5 @@
 replicaCount: 1
 image:
-  repository: registry.arc-center.run/silverkeytech/SkFileBlogNew/master
+  repository: registry.arc-center.run/silverkeytech/skfileblognew/master
   pullPolicy: IfNotPresent
-  tag: master-SkFileBlogNew-dev-latest
+  tag: 9a16f7

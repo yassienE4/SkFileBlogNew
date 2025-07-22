@@ -99,7 +99,7 @@ jobs:
           argocd repo add "$repo_url" --type git --name SkFileBlogNew-repo || true
 
           argocd app create "$app_name" \
-            --repo "$repo_url" \
+            --repo SkFileBlogNew-repo \
             --path charts/SkFileBlogNew \
             --dest-namespace dev \
             --dest-server https://kubernetes.default.svc \

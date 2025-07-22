@@ -71,7 +71,7 @@ jobs:
           git add charts/SkFileBlogNew/values-dev.yaml
           git commit -m "Updates values.yaml with commit ${{ needs.ci.outputs.commit_id }}" || echo "No changes to commit"
           git pull origin master --rebase
-          git push https://x-access-token:${{ secrets.GIT_TOKEN }}@github.com/yassienE4/SkFileBlogNew.git HEAD:master
+          git push https://x-access-token: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@github.com/yassienE4/SkFileBlogNew.git HEAD:master
 
       - name: Install ArgoCD CLI
         run: |

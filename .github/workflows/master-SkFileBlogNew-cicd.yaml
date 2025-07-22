@@ -65,13 +65,16 @@ jobs:
           ' charts/SkFileBlogNew/values-dev.yaml
 
       - name: Commit and push changes manually
+        env:
+          GIT_TOKEN: ${{ secrets.GIT_TOKEN }}
         run: |
+          git config --global --unset credential.helper || true
           git config user.name "yassienE4"
           git config user.email "yassienE4K@users.noreply.github.com"
           git add charts/SkFileBlogNew/values-dev.yaml
           git commit -m "Updates values.yaml with commit ${{ needs.ci.outputs.commit_id }}" || echo "No changes to commit"
-          git pull origin master --rebase
-          git push https://x-access-token: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@github.com/yassienE4/SkFileBlogNew.git HEAD:master
+          git pull https://x-access-token:${GIT_TOKEN}@github.com/yassienE4/SkFileBlogNew.git master --rebase
+          git push https://x-access-token:${GIT_TOKEN}@github.com/yassienE4/SkFileBlogNew.git HEAD:master
 
       - name: Install ArgoCD CLI
         run: |
@@ -89,11 +92,9 @@ jobs:
 
       - name: Ensure ArgoCD repo and app
         run: |
-          repo="https://github.com/yassienE4/SkFileBlogNew.git"
           repo_url="https://x-access-token:${{ secrets.GIT_TOKEN }}@github.com/yassienE4/SkFileBlogNew.git"
           app_name="master-SkFileBlogNew"
 
-          # Try to add the repo and app (ignore if they already exist)
           argocd repo add "$repo_url" --type git --name SkFileBlogNew-repo || true
 
           argocd app create "$app_name" \

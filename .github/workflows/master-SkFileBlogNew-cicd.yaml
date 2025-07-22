@@ -89,12 +89,12 @@ jobs:
             --insecure \
             --grpc-web \
             --username admin \
-            --password pwy5T8UHZeiLBRGW
+            --password "${{ secrets.ARGOCD_PASSWORD }}"
 
       - name: Ensure ArgoCD repo and app
         run: |
           repo="https://github.com/yassienE4/SkFileBlogNew.git"
-          repo_url="https://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@github.com/yassienE4/SkFileBlogNew.git"
+          repo_url="://x-access-token:${{ secrets.GIT_TOKEN }}@github.com/yassienE4/SkFileBlogNew.git"
           app_name="master-SkFileBlogNew"
 
           argocd repo add "$repo_url" --type git --name SkFileBlogNew-repo || true

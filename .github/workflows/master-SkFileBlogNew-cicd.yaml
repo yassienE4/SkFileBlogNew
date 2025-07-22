@@ -98,13 +98,13 @@ jobs:
           repo="https://github.com/yassienE4/SkFileBlogNew.git"
           
           repo_url="https://x-access-token:${GIT_TOKEN}@github.com/yassienE4/SkFileBlogNew.git"
-          app_name="master-SkFileBlogNew"
+          app_name="master-skfileblognew"
 
-          argocd repo add "$repo" --type git --name SkFileBlogNew-repo || true
+          argocd repo add "$repo" --type git --name skfileblognew-repo || true
 
           argocd app create "$app_name" \
             --repo "$repo" \
-            --path charts/SkFileBlogNew \
+            --path charts/skfileblognew \
             --dest-namespace dev \
             --dest-server https://kubernetes.default.svc \
             --values values-dev.yaml \
@@ -115,6 +115,6 @@ jobs:
 
       - name: ArgoCD app sync
         run: |
-          app_name="master-SkFileBlogNew"
+          app_name="master-skfileblognew"
           argocd app sync $app_name
           argocd app wait $app_name --timeout 180

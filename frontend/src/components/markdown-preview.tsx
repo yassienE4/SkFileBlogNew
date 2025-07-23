@@ -108,8 +108,8 @@ export function MarkdownPreview({
     const start = textarea.selectionStart;
     const end = textarea.selectionEnd;
     
-    // Insert markdown image syntax
-    const imageMarkdown = `![Image](${imageUrl})`;
+    // Insert markdown image syntax with line breaks
+    const imageMarkdown = `\n![Image](${imageUrl})\n`;
     const newContent = 
       content.substring(0, start) + 
       imageMarkdown + 
@@ -118,7 +118,7 @@ export function MarkdownPreview({
     onChange(newContent);
     setShowImageUpload(false);
     
-    // Reset cursor position
+    // Reset cursor position (after the image and second line break)
     setTimeout(() => {
       textarea.focus();
       const newPosition = start + imageMarkdown.length;

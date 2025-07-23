@@ -30,6 +30,8 @@ export function MarkdownPreview({
   const [showImageUpload, setShowImageUpload] = useState(false);
   const [lastProcessedContent, setLastProcessedContent] = useState<string>('');
   const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const [caretPosition, setCaretPosition] = useState({ start: 0, end: 0 });
 
   const handlePreview = async (forceUpdate = false) => {
     if (activeTab === 'preview' && (forceUpdate || content !== lastProcessedContent)) {
@@ -74,14 +76,30 @@ export function MarkdownPreview({
     };
   }, []);
 
+  // Store caret position when textarea loses focus
+  const handleTextareaBlur = () => {
+    if (textareaRef.current) {
+      setCaretPosition({
+        start: textareaRef.current.selectionStart,
+        end: textareaRef.current.selectionEnd
+      });
+    }
+  };
+
+  // Update caret position when user types or moves cursor
+  const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    onChange?.(e.target.value);
+    setCaretPosition({
+      start: e.target.selectionStart,
+      end: e.target.selectionEnd
+    });
+  };
+
   const insertMarkdown = (before: string, after: string = '', placeholder: string = '') => {
     if (readonly || !onChange) return;
     
-    const textarea = document.querySelector('textarea') as HTMLTextAreaElement;
-    if (!textarea) return;
-
-    const start = textarea.selectionStart;
-    const end = textarea.selectionEnd;
+    const start = caretPosition.start;
+    const end = caretPosition.end;
     const selectedText = content.substring(start, end);
     const textToInsert = selectedText || placeholder;
     const newContent = 
@@ -91,22 +109,22 @@ export function MarkdownPreview({
     
     onChange(newContent);
     
-    // Reset cursor position
+    // Reset cursor position and focus
     setTimeout(() => {
-      textarea.focus();
-      const newPosition = start + before.length + textToInsert.length;
-      textarea.setSelectionRange(newPosition, newPosition);
+      if (textareaRef.current) {
+        textareaRef.current.focus();
+        const newPosition = start + before.length + textToInsert.length;
+        textareaRef.current.setSelectionRange(newPosition, newPosition);
+        setCaretPosition({ start: newPosition, end: newPosition });
+      }
     }, 0);
   };
 
   const insertImage = (imageUrl: string) => {
     if (readonly || !onChange) return;
     
-    const textarea = document.querySelector('textarea') as HTMLTextAreaElement;
-    if (!textarea) return;
-
-    const start = textarea.selectionStart;
-    const end = textarea.selectionEnd;
+    const start = caretPosition.start;
+    const end = caretPosition.end;
     
     // Insert markdown image syntax with line breaks
     const imageMarkdown = `\n![Image](${imageUrl})\n`;
@@ -120,9 +138,12 @@ export function MarkdownPreview({
     
     // Reset cursor position (after the image and second line break)
     setTimeout(() => {
-      textarea.focus();
-      const newPosition = start + imageMarkdown.length;
-      textarea.setSelectionRange(newPosition, newPosition);
+      if (textareaRef.current) {
+        textareaRef.current.focus();
+        const newPosition = start + imageMarkdown.length;
+        textareaRef.current.setSelectionRange(newPosition, newPosition);
+        setCaretPosition({ start: newPosition, end: newPosition });
+      }
     }, 0);
   };
 
@@ -234,8 +255,17 @@ export function MarkdownPreview({
         
         {activeTab === 'edit' ? (
           <Textarea
+            ref={textareaRef}
             value={content}
-            onChange={(e) => onChange?.(e.target.value)}
+            onChange={handleTextareaChange}
+            onBlur={handleTextareaBlur}
+            onSelect={(e) => {
+              const target = e.target as HTMLTextAreaElement;
+              setCaretPosition({
+                start: target.selectionStart,
+                end: target.selectionEnd
+              });
+            }}
             placeholder="Write your content here... You can use Markdown syntax!"
             className="min-h-[400px] font-mono"
             readOnly={readonly}

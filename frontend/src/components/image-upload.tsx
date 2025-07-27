@@ -2,7 +2,6 @@
 
 import React, { useState, useCallback } from 'react';
 import { uploadFile, getMediaFiles, deleteMediaFile } from '@/lib/api';
-import { getAuthTokenClient } from '@/lib/auth-client';
 import { getMediaUrl } from '@/lib/media-utils';
 import { MediaFile, MediaType } from '@/types/media';
 import { Button } from '@/components/ui/button';
@@ -35,10 +34,7 @@ export function ImageUpload({
     
     setIsLoadingMedia(true);
     try {
-      const authToken = getAuthTokenClient();
-      if (!authToken) throw new Error('No authentication token found');
-
-      const files = await getMediaFiles(authToken);
+      const files = await getMediaFiles();
       setMediaFiles(files.filter(file => allowedTypes.includes(file.type)));
       setMediaLoaded(true);
     } catch (error) {
@@ -56,10 +52,7 @@ export function ImageUpload({
     setUploadError(null);
 
     try {
-      const authToken = getAuthTokenClient();
-      if (!authToken) throw new Error('No authentication token found');
-
-      const mediaFile = await uploadFile(file, authToken);
+      const mediaFile = await uploadFile(file);
       setMediaFiles(prev => [mediaFile, ...prev]);
       
       if (onImageSelect && mediaFile.type === MediaType.Image) {
@@ -77,10 +70,7 @@ export function ImageUpload({
 
   const handleDeleteFile = async (fileId: string) => {
     try {
-      const authToken = getAuthTokenClient();
-      if (!authToken) throw new Error('No authentication token found');
-
-      await deleteMediaFile(fileId, authToken);
+      await deleteMediaFile(fileId);
       setMediaFiles(prev => prev.filter(f => f.id !== fileId));
     } catch (error) {
       console.error('Failed to delete file:', error);

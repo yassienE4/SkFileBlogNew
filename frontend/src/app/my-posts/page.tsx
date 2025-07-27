@@ -76,12 +76,7 @@ function MyPostsContent() {
 
     setIsDeleting(true);
     try {
-      const authToken = getAuthTokenClient();
-      if (!authToken) {
-        throw new Error('Authentication required');
-      }
-
-      await deletePost(postToDelete, authToken);
+      await deletePost(postToDelete);
       
       // Trigger cache invalidation for comprehensive data refresh
       await invalidateAfterPostMutation(postToDelete);

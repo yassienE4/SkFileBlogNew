@@ -148,18 +148,12 @@ function EditPostForm({ slug }: { slug: string }) {
     setError(null);
 
     try {
-      const authToken = getAuthTokenClient();
-      
-      if (!authToken) {
-        throw new Error('Authentication token not found. Please log in again.');
-      }
-      
       const updateData = { ...formData };
       if (updateData.scheduledDate === '') {
         updateData.scheduledDate = undefined;
       }
       
-      const response = await updatePost(slug, updateData, authToken);
+      const response = await updatePost(slug, updateData);
       
       // Trigger cache invalidation for comprehensive data refresh
       await invalidateAfterPostMutation(response.slug);

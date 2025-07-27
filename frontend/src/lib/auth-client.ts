@@ -44,3 +44,14 @@ export function getAuthTokenClient(): string | null {
   
   return tokenCookie.split('=')[1] || null;
 }
+
+export function getRefreshTokenClient(): string | null {
+  if (typeof window === 'undefined') return null;
+  
+  const cookies = document.cookie.split(';');
+  const refreshTokenCookie = cookies.find(cookie => cookie.trim().startsWith(`${REFRESH_TOKEN_KEY}=`));
+  
+  if (!refreshTokenCookie) return null;
+  
+  return refreshTokenCookie.split('=')[1] || null;
+}

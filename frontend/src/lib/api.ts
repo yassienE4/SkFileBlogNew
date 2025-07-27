@@ -1,7 +1,8 @@
 import { BlogPostsResponse, TagsResponse, CategoriesResponse, BlogPost, CreatePostRequest, CreatePostResponse, UpdatePostRequest } from '@/types/blog';
-import { RegisterRequest, RegisterResponse, LoginRequest, LoginResponse, UsersResponse, CreateUserRequest, User } from '@/types/auth';
+import { RegisterRequest, RegisterResponse, LoginRequest, LoginResponse, RefreshTokenRequest, RefreshTokenResponse, UsersResponse, CreateUserRequest, User } from '@/types/auth';
 import { MediaFile } from '@/types/media';
 import { CACHE_TAGS } from './data-refresh';
+import { authenticatedGet, authenticatedPost, authenticatedPut, authenticatedDelete, authenticatedFileUpload } from './auth-interceptor';
 
 export const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL!;
 
@@ -133,45 +134,27 @@ export async function fetchPostBySlug(slug: string): Promise<BlogPost> {
 }
 
 // Post creation API
-export async function createPost(data: CreatePostRequest, authToken: string): Promise<CreatePostResponse> {
-  const response = await fetch(`${BASE_URL}/posts`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${authToken}`,
-      "ngrok-skip-browser-warning": "true", // Skip ngrok warning in development
-    },
-    body: JSON.stringify(data),
-  });
-
+export async function createPost(data: CreatePostRequest): Promise<CreatePostResponse> {
+  const response = await authenticatedPost(`${BASE_URL}/posts`, data);
+  
   if (!response.ok) {
     const errorData = await response.text();
     throw new Error(`Failed to create post: ${errorData}`);
   }
-
+  
   const result = await response.json();
   
   // Trigger cache invalidation after successful creation
   if (typeof window !== 'undefined') {
     // Client-side: trigger cache invalidation
     const { invalidateAfterPostMutation } = await import('./cache-actions');
-    await invalidateAfterPostMutation(result.slug);
+    await invalidateAfterPostMutation();
   }
-
+  
   return result;
-}
-
-// Post update API
-export async function updatePost(slug: string, data: UpdatePostRequest, authToken: string): Promise<BlogPost> {
-  const response = await fetch(`${BASE_URL}/posts/${slug}`, {
-    method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${authToken}`,
-      "ngrok-skip-browser-warning": "true", // Skip ngrok warning in development
-    },
-    body: JSON.stringify(data),
-  });
+}// Post update API
+export async function updatePost(slug: string, data: UpdatePostRequest): Promise<BlogPost> {
+  const response = await authenticatedPut(`${BASE_URL}/posts/${slug}`, data);
 
   if (!response.ok) {
     const errorData = await response.text();
@@ -191,14 +174,8 @@ export async function updatePost(slug: string, data: UpdatePostRequest, authToke
 }
 
 // Post deletion API
-export async function deletePost(slug: string, authToken: string): Promise<void> {
-  const response = await fetch(`${BASE_URL}/posts/${slug}`, {
-    method: 'DELETE',
-    headers: {
-      'Authorization': `Bearer ${authToken}`,
-      "ngrok-skip-browser-warning": "true", // Skip ngrok warning in development
-    },
-  });
+export async function deletePost(slug: string): Promise<void> {
+  const response = await authenticatedDelete(`${BASE_URL}/posts/${slug}`);
 
   if (!response.ok) {
     const errorData = await response.text();
@@ -250,68 +227,77 @@ export async function login(data: LoginRequest): Promise<LoginResponse> {
   return response.json();
 }
 
-// User Management API functions (Admin only)
-export async function fetchAllUsers(authToken: string, page: number = 1, pageSize: number = 10): Promise<UsersResponse> {
-  console.log(`Fetching users: page=${page}, pageSize=${pageSize}`);
-  const response = await fetch(`${BASE_URL}/users?page=${page}&pageSize=${pageSize}`, {
-    headers: {
-      'Authorization': `Bearer ${authToken}`,
-      "ngrok-skip-browser-warning": "true", // Skip ngrok warning in development
-    },
-    next: { 
-      revalidate: 60, // Revalidate every minute for admin data
-      tags: [CACHE_TAGS.USERS],
-    },
-  });
-
-  if (!response.ok) {
-    const errorText = await response.text();
-    console.error('Users API error:', response.status, errorText);
-    throw new Error(errorText || 'Failed to fetch users');
-  }
-
-  const data = await response.json();
-  console.log('Raw users API response:', data);
-  
-  // Check if the response is already in the expected format
-  if (data.users && typeof data.totalCount === 'number') {
-    console.log('Backend returned paginated response');
-    return data;
-  }
-  
-  // If the backend returns a simple array, wrap it in the expected format
-  const users = Array.isArray(data) ? data : [];
-  const totalCount = users.length;
-  const totalPages = Math.ceil(totalCount / pageSize);
-  
-  console.log(`Backend returned simple array with ${users.length} users`);
-  
-  // Apply client-side pagination if backend doesn't support it
-  const startIndex = (page - 1) * pageSize;
-  const pagedUsers = users.slice(startIndex, startIndex + pageSize);
-  
-  const result = {
-    users: pagedUsers,
-    totalCount: totalCount,
-    page: page,
-    pageSize: pageSize,
-    totalPages: totalPages
-  };
-  
-  console.log('Transformed response:', result);
-  return result;
-}
-
-export async function createUser(data: CreateUserRequest, authToken: string): Promise<User> {
-  const response = await fetch(`${BASE_URL}/users`, {
+export async function refreshToken(data: RefreshTokenRequest): Promise<RefreshTokenResponse> {
+  const response = await fetch(`${BASE_URL}/auth/refresh`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${authToken}`,
       "ngrok-skip-browser-warning": "true", // Skip ngrok warning in development
     },
     body: JSON.stringify(data),
   });
+  
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(errorText || 'Token refresh failed');
+  }
+  
+  return response.json();
+}
+
+// User Management API functions (Admin only)
+export async function fetchAllUsers(page: number = 1, pageSize: number = 10): Promise<UsersResponse> {
+  console.log(`Fetching users: page=${page}, pageSize=${pageSize}`);
+  
+  // Check if we're on client side (no caching for client-side requests)
+  if (typeof window !== 'undefined') {
+    const response = await authenticatedGet(`${BASE_URL}/users?page=${page}&pageSize=${pageSize}`);
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Users API error:', response.status, errorText);
+      throw new Error(errorText || 'Failed to fetch users');
+    }
+
+    const data = await response.json();
+    console.log('Raw users API response:', data);
+    
+    // Check if the response is already in the expected format
+    if (data.users && typeof data.totalCount === 'number') {
+      console.log('Backend returned paginated response');
+      return data;
+    }
+    
+    // If the backend returns a simple array, wrap it in the expected format
+    const users = Array.isArray(data) ? data : [];
+    const totalCount = users.length;
+    const totalPages = Math.ceil(totalCount / pageSize);
+    
+    console.log(`Backend returned simple array with ${users.length} users`);
+    
+    // Apply client-side pagination if backend doesn't support it
+    const startIndex = (page - 1) * pageSize;
+    const pagedUsers = users.slice(startIndex, startIndex + pageSize);
+    
+    const result = {
+      users: pagedUsers,
+      totalCount: totalCount,
+      page: page,
+      pageSize: pageSize,
+      totalPages: totalPages
+    };
+    
+    console.log('Transformed response:', result);
+    return result;
+  }
+  
+  // This is server-side - we need to handle this differently
+  // For now, throw an error as server-side should use different approach
+  throw new Error('fetchAllUsers should not be called server-side without auth token');
+}
+
+export async function createUser(data: CreateUserRequest): Promise<User> {
+  const response = await authenticatedPost(`${BASE_URL}/users`, data);
 
   if (!response.ok) {
     const errorText = await response.text();
@@ -321,16 +307,8 @@ export async function createUser(data: CreateUserRequest, authToken: string): Pr
   return response.json();
 }
 
-export async function updateUserStatus(userId: string, isActive: boolean, authToken: string): Promise<void> {
-  const response = await fetch(`${BASE_URL}/users/${userId}/status`, {
-    method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${authToken}`,
-      "ngrok-skip-browser-warning": "true", // Skip ngrok warning in development
-    },
-    body: JSON.stringify({ isActive }),
-  });
+export async function updateUserStatus(userId: string, isActive: boolean): Promise<void> {
+  const response = await authenticatedPut(`${BASE_URL}/users/${userId}/status`, { isActive });
 
   if (!response.ok) {
     const errorText = await response.text();
@@ -338,14 +316,8 @@ export async function updateUserStatus(userId: string, isActive: boolean, authTo
   }
 }
 
-export async function deleteUser(userId: string, authToken: string): Promise<void> {
-  const response = await fetch(`${BASE_URL}/users/${userId}`, {
-    method: 'DELETE',
-    headers: {
-      'Authorization': `Bearer ${authToken}`,
-      "ngrok-skip-browser-warning": "true", // Skip ngrok warning in development
-    },
-  });
+export async function deleteUser(userId: string): Promise<void> {
+  const response = await authenticatedDelete(`${BASE_URL}/users/${userId}`);
 
   if (!response.ok) {
     const errorText = await response.text();
@@ -354,18 +326,11 @@ export async function deleteUser(userId: string, authToken: string): Promise<voi
 }
 
 // Media upload API
-export async function uploadFile(file: File, authToken: string): Promise<MediaFile> {
+export async function uploadFile(file: File): Promise<MediaFile> {
   const formData = new FormData();
   formData.append('file', file);
 
-  const response = await fetch(`${BASE_URL}/media/upload`, {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${authToken}`,
-      "ngrok-skip-browser-warning": "true", // Skip ngrok warning in development
-    },
-    body: formData,
-  });
+  const response = await authenticatedFileUpload(`${BASE_URL}/media/upload`, formData);
 
   if (!response.ok) {
     const errorText = await response.text();
@@ -376,13 +341,8 @@ export async function uploadFile(file: File, authToken: string): Promise<MediaFi
 }
 
 // Get media files for the user
-export async function getMediaFiles(authToken: string): Promise<MediaFile[]> {
-  const response = await fetch(`${BASE_URL}/media`, {
-    headers: {
-      'Authorization': `Bearer ${authToken}`,
-      "ngrok-skip-browser-warning": "true", // Skip ngrok warning in development
-    },
-  });
+export async function getMediaFiles(): Promise<MediaFile[]> {
+  const response = await authenticatedGet(`${BASE_URL}/media`);
 
   if (!response.ok) {
     const errorText = await response.text();
@@ -393,14 +353,8 @@ export async function getMediaFiles(authToken: string): Promise<MediaFile[]> {
 }
 
 // Delete media file
-export async function deleteMediaFile(fileId: string, authToken: string): Promise<void> {
-  const response = await fetch(`${BASE_URL}/media/${fileId}`, {
-    method: 'DELETE',
-    headers: {
-      'Authorization': `Bearer ${authToken}`,
-      "ngrok-skip-browser-warning": "true", // Skip ngrok warning in development
-    },
-  });
+export async function deleteMediaFile(fileId: string): Promise<void> {
+  const response = await authenticatedDelete(`${BASE_URL}/media/${fileId}`);
 
   if (!response.ok) {
     const errorText = await response.text();

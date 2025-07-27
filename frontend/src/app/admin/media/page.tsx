@@ -49,10 +49,7 @@ function MediaManagementContent() {
 
   const loadMediaFiles = async () => {
     try {
-      const authToken = getAuthTokenClient();
-      if (!authToken) throw new Error('No authentication token found');
-
-      const files = await getMediaFiles(authToken);
+      const files = await getMediaFiles();
       setMediaFiles(files);
     } catch (error) {
       console.error('Failed to load media files:', error);
@@ -65,10 +62,7 @@ function MediaManagementContent() {
     if (!confirm('Are you sure you want to delete this file?')) return;
 
     try {
-      const authToken = getAuthTokenClient();
-      if (!authToken) throw new Error('No authentication token found');
-
-      await deleteMediaFile(fileId, authToken);
+      await deleteMediaFile(fileId);
       setMediaFiles(prev => prev.filter(f => f.id !== fileId));
     } catch (error) {
       console.error('Failed to delete file:', error);

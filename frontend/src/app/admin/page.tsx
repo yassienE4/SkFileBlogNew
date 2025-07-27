@@ -12,7 +12,7 @@ import { Pagination } from '@/components/simple-pagination';
 import { fetchAllUsers, createUser, fetchRecentPosts, deletePost } from '@/lib/api';
 import { invalidateAfterPostMutation, invalidateUsersCache } from '@/lib/cache-actions';
 import { useAdminDataRefresh, useDebounceDataLoader } from '@/lib/admin-hooks';
-import { getCurrentUserClient, getAuthTokenClient } from '@/lib/auth-client';
+import { getCurrentUserClient } from '@/lib/auth-client';
 import { User, CreateUserRequest } from '@/types/auth';
 import { BlogPost } from '@/types/blog';
 import { Trash2, Users, FileText, UserPlus, Edit, Eye, Image as ImageIcon } from 'lucide-react';
@@ -20,7 +20,6 @@ import AdminRoute from '@/components/admin-route';
 
 function AdminPanelContent() {
   const [currentUser, setCurrentUser] = useState(getCurrentUserClient());
-  const [authToken, setAuthToken] = useState<string | null>(null);
   const [users, setUsers] = useState<User[]>([]);
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
@@ -43,18 +42,10 @@ function AdminPanelContent() {
 
   useEffect(() => {
     const user = getCurrentUserClient();
-    const token = getAuthTokenClient();
-    
     setCurrentUser(user);
-    setAuthToken(token);
   }, []);
 
   const loadData = useCallback(async () => {
-    if (!authToken) {
-      console.log('Admin: No auth token, skipping load');
-      return;
-    }
-    
     console.log('Admin: Loading data for tab:', activeTab, 'userPage:', userPage, 'postPage:', postPage);
     setLoading(true);
     setError(null);
@@ -62,7 +53,7 @@ function AdminPanelContent() {
     try {
       // Always load both counts for tab display, but only load full data for active tab
       const [usersResponse, postsResponse] = await Promise.allSettled([
-        fetchAllUsers(authToken, activeTab === 'users' ? userPage : 1, activeTab === 'users' ? pageSize : 1),
+        fetchAllUsers(activeTab === 'users' ? userPage : 1, activeTab === 'users' ? pageSize : 1),
         fetchRecentPosts(activeTab === 'posts' ? postPage : 1, activeTab === 'posts' ? pageSize : 1)
       ]);
 
@@ -99,14 +90,14 @@ function AdminPanelContent() {
     } finally {
       setLoading(false);
     }
-  }, [authToken, activeTab, userPage, postPage, pageSize]);
+  }, [activeTab, userPage, postPage, pageSize]);
 
   // Initial data load
   useEffect(() => {
-    if (authToken && currentUser?.role === 'Admin') {
+    if (currentUser?.role === 'Admin') {
       loadData();
     }
-  }, [authToken, currentUser, activeTab, userPage, postPage, loadData]);
+  }, [currentUser, activeTab, userPage, postPage, loadData]);
 
   // Use debounced data loading for refresh events only
   const debouncedLoadData = useDebounceDataLoader(loadData, 300);
@@ -115,10 +106,8 @@ function AdminPanelContent() {
   useAdminDataRefresh(activeTab, debouncedLoadData);
 
   const handleCreateUser = async () => {
-    if (!authToken) return;
-    
     try {
-      await createUser(createUserData, authToken);
+      await createUser(createUserData);
       setShowCreateUserDialog(false);
       setCreateUserData({
         username: '',
@@ -138,14 +127,12 @@ function AdminPanelContent() {
   };
 
   const handleDeletePost = async (slug: string) => {
-    if (!authToken) return;
-    
     if (!confirm('Are you sure you want to delete this post? This action cannot be undone.')) {
       return;
     }
     
     try {
-      await deletePost(slug, authToken);
+      await deletePost(slug);
       
       // Trigger cache invalidation for comprehensive data refresh
       await invalidateAfterPostMutation(slug);

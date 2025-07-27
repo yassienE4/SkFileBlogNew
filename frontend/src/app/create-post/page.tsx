@@ -150,13 +150,6 @@ function CreatePostForm() {
         return;
       }
 
-      // Get auth token from cookies
-      const authToken = getAuthTokenClient();
-      
-      if (!authToken) {
-        throw new Error('Authentication token not found. Please log in again.');
-      }
-      
       const createData = { ...formData };
       if (createData.scheduledDate === '') {
         createData.scheduledDate = undefined;
@@ -164,7 +157,7 @@ function CreatePostForm() {
       
       if(createData.scheduledDate && createData.status == 0) {createData.status =2;} // Set to scheduled if date is provided
       
-      const response = await createPost(createData, authToken);
+      const response = await createPost(createData);
       
       // Trigger cache invalidation for comprehensive data refresh
       await invalidateAfterPostMutation(response.slug);

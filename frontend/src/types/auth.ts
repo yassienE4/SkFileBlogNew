@@ -50,6 +50,17 @@ export interface LoginResponse {
   user: LoginUser;
 }
 
+export interface RefreshTokenRequest {
+  refreshToken: string;
+}
+
+export interface RefreshTokenResponse {
+  accessToken: string;
+  refreshToken: string;
+  expiresAt: string;
+  user: LoginUser;
+}
+
 export interface CreateUserRequest {
   username: string;
   email: string;

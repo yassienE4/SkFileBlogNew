@@ -43,12 +43,7 @@ export function PostActions({ slug, isOwner, authorId }: PostActionsProps) {
   const handleDeleteConfirm = async () => {
     setIsDeleting(true);
     try {
-      const authToken = getAuthTokenClient();
-      if (!authToken) {
-        throw new Error('Authentication required');
-      }
-
-      await deletePost(slug, authToken);
+      await deletePost(slug);
       
       // Trigger cache invalidation for comprehensive data refresh
       await invalidateAfterPostMutation(slug);

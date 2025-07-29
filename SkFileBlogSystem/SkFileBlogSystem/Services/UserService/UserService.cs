@@ -10,7 +10,6 @@ public class UserService : IUserService
 {
     private readonly string _usersPath;
     private const string PasswordSalt = "SkFileBlog2024SecureSalt!"; // Should be in config
-    private readonly List<User> _users;
     private readonly ILogger<UserService> _logger;
     public async Task<User?> GetUserByEmailAsync(string email)
     {
@@ -22,8 +21,21 @@ public class UserService : IUserService
             // Normalize email to lowercase for comparison
             var normalizedEmail = email.ToLowerInvariant();
             
-            return await Task.FromResult(_users.FirstOrDefault(u => 
-                u.Email.ToLowerInvariant() == normalizedEmail));
+            // Search through all user directories
+            foreach (var userDir in Directory.GetDirectories(_usersPath))
+            {
+                var profilePath = Path.Combine(userDir, "profile.json");
+                if (File.Exists(profilePath))
+                {
+                    var user = JsonSerializer.Deserialize<User>(await File.ReadAllTextAsync(profilePath));
+                    if (user != null && user.Email.ToLowerInvariant() == normalizedEmail)
+                    {
+                        return user;
+                    }
+                }
+            }
+            
+            return null;
         }
         catch (Exception ex)
         {
@@ -31,32 +43,61 @@ public class UserService : IUserService
             return null;
         }
     }
-    public UserService(IConfiguration configuration)
+    public UserService(IConfiguration configuration, ILogger<UserService>? logger = null)
     {
+        _logger = logger!;
         var contentPath = configuration["ContentPath"] ?? Path.Combine(Directory.GetCurrentDirectory(), "content");
         _usersPath = Path.Combine(contentPath, "users");
+        
+        _logger?.LogInformation($"UserService initialized with users path: {_usersPath}");
         Directory.CreateDirectory(_usersPath);
+        
+        _logger?.LogInformation($"Users directory exists: {Directory.Exists(_usersPath)}");
     }
 
     public async Task<List<User>> GetAllUsersAsync()
     {
-        var users = new List<User>();
-
-        foreach (var userDir in Directory.GetDirectories(_usersPath))
+        try
         {
-            var profilePath = Path.Combine(userDir, "profile.json");
-            if (File.Exists(profilePath))
+            var users = new List<User>();
+
+            _logger?.LogInformation($"Attempting to read users from: {_usersPath}");
+
+            if (!Directory.Exists(_usersPath))
             {
-                var user = JsonSerializer.Deserialize<User>(await File.ReadAllTextAsync(profilePath));
-                if (user != null)
+                _logger?.LogWarning($"Users directory does not exist: {_usersPath}");
+                return users;
+            }
+
+            var userDirectories = Directory.GetDirectories(_usersPath);
+            _logger?.LogInformation($"Found {userDirectories.Length} user directories");
+
+            foreach (var userDir in userDirectories)
+            {
+                var profilePath = Path.Combine(userDir, "profile.json");
+                if (File.Exists(profilePath))
                 {
-                    user.PasswordHash = string.Empty; // Don't expose password hash
-                    users.Add(user);
+                    var user = JsonSerializer.Deserialize<User>(await File.ReadAllTextAsync(profilePath));
+                    if (user != null)
+                    {
+                        user.PasswordHash = string.Empty; // Don't expose password hash
+                        users.Add(user);
+                    }
+                }
+                else
+                {
+                    _logger?.LogWarning($"Profile.json not found in: {userDir}");
                 }
             }
-        }
 
-        return users;
+            _logger?.LogInformation($"Successfully loaded {users.Count} users");
+            return users;
+        }
+        catch (Exception ex)
+        {
+            _logger?.LogError(ex, "Error in GetAllUsersAsync");
+            return new List<User>();
+        }
     }
 
     public async Task<User?> GetUserByIdAsync(string id)

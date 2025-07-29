@@ -23,8 +23,12 @@ WORKDIR /app
 # Copy the published application from the build stage
 COPY --from=build /app/out .
 
-# Create content directory and set permissions
-RUN mkdir -p /app/content && chmod -R 755 /app/content
+# Copy content directory with proper permissions
+COPY --from=build /app/content ./content
+
+# Ensure content directory exists and set proper permissions
+RUN mkdir -p /app/content/posts /app/content/users /app/content/categories /app/content/tags /app/content/media && \
+    chmod -R 755 /app/content
 
 # Expose the port that the app runs on
 EXPOSE 8080

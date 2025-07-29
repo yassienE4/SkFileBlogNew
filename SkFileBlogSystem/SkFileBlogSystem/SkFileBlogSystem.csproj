@@ -4,16 +4,8 @@
         <TargetFramework>net9.0</TargetFramework>
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
+        <EnableDefaultContentItems>false</EnableDefaultContentItems>
     </PropertyGroup>
-
-    <ItemGroup>
-      <Folder Include="content\categories\" />
-      <Folder Include="content\config\" />
-      <Folder Include="content\media\" />
-      <Folder Include="content\posts\" />
-      <Folder Include="content\tags\" />
-      <Folder Include="content\users\" />
-    </ItemGroup>
 
     <ItemGroup>
       <PackageReference Include="Markdig" Version="0.41.3" />
@@ -25,20 +17,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <_ContentIncludedByDefault Remove="content\users\admin\profile.json" />
-      <_ContentIncludedByDefault Remove="content\posts\2025-07-01-111\meta.json" />
-      <_ContentIncludedByDefault Remove="content\posts\2025-07-01-test2\meta.json" />
-      <_ContentIncludedByDefault Remove="content\posts\2025-07-03-dummy-post\meta.json" />
-      <_ContentIncludedByDefault Remove="content\posts\2025-07-03-tesr\meta.json" />
-      <_ContentIncludedByDefault Remove="content\posts\2025-07-03-test-schedule-again\meta.json" />
-      <_ContentIncludedByDefault Remove="content\posts\2025-07-03-testing-admin-panel\meta.json" />
-      <_ContentIncludedByDefault Remove="content\posts\2025-07-13-wow\meta.json" />
-      <_ContentIncludedByDefault Remove="content\users\abdullah\profile.json" />
-      <_ContentIncludedByDefault Remove="content\users\secondadmin\profile.json" />
-      <_ContentIncludedByDefault Remove="content\users\johnny\profile.json" />
-      <_ContentIncludedByDefault Remove="content\users\johndoe\profile.json" />
-      <_ContentIncludedByDefault Remove="content\users\displaynametest\profile.json" />
-      <_ContentIncludedByDefault Remove="content\users\testuser\profile.json" />
+      <Content Include="content\**\*" CopyToOutputDirectory="PreserveNewest" />
     </ItemGroup>
 
 </Project>

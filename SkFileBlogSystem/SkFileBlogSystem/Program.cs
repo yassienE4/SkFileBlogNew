@@ -340,14 +340,74 @@ app.MapPost("/api/users", async (CreateUserRequest request, IUserService userSer
 .WithName("CreateUser");
 
 // Health check endpoint
-app.MapGet("/health", () => 
+app.MapGet("/health", (IConfiguration configuration) => 
 {
-    return Results.Ok(new { 
-        status = "healthy", 
+    var contentPath = configuration["ContentPath"] ?? Path.Combine(Directory.GetCurrentDirectory(), "content");
+    var postsPath = Path.Combine(contentPath, "posts");
+    var usersPath = Path.Combine(contentPath, "users");
+    var categoriesPath = Path.Combine(contentPath, "categories");
+    var tagsPath = Path.Combine(contentPath, "tags");
+
+    var diagnostics = new
+    {
+        status = "healthy",
         timestamp = DateTime.UtcNow,
-        version = "1.0.0" 
-    });
+        version = "1.0.0",
+        directories = new
+        {
+            contentPath = new
+            {
+                path = contentPath,
+                exists = Directory.Exists(contentPath),
+                accessible = Directory.Exists(contentPath) && CanAccessDirectory(contentPath)
+            },
+            posts = new
+            {
+                path = postsPath,
+                exists = Directory.Exists(postsPath),
+                accessible = Directory.Exists(postsPath) && CanAccessDirectory(postsPath),
+                count = Directory.Exists(postsPath) ? Directory.GetDirectories(postsPath).Length : 0
+            },
+            users = new
+            {
+                path = usersPath,
+                exists = Directory.Exists(usersPath),
+                accessible = Directory.Exists(usersPath) && CanAccessDirectory(usersPath),
+                count = Directory.Exists(usersPath) ? Directory.GetDirectories(usersPath).Length : 0
+            },
+            categories = new
+            {
+                path = categoriesPath,
+                exists = Directory.Exists(categoriesPath),
+                accessible = Directory.Exists(categoriesPath) && CanAccessDirectory(categoriesPath),
+                count = Directory.Exists(categoriesPath) ? Directory.GetFiles(categoriesPath, "*.json").Length : 0
+            },
+            tags = new
+            {
+                path = tagsPath,
+                exists = Directory.Exists(tagsPath),
+                accessible = Directory.Exists(tagsPath) && CanAccessDirectory(tagsPath),
+                count = Directory.Exists(tagsPath) ? Directory.GetFiles(tagsPath, "*.json").Length : 0
+            }
+        }
+    };
+
+    return Results.Ok(diagnostics);
 })
 .WithName("HealthCheck");
+
+// Helper method for directory access check
+static bool CanAccessDirectory(string path)
+{
+    try
+    {
+        Directory.GetDirectories(path);
+        return true;
+    }
+    catch
+    {
+        return false;
+    }
+}
 
 app.Run();

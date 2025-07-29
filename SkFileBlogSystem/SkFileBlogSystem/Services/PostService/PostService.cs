@@ -11,32 +11,74 @@ public class PostService : IPostService
     private readonly IUserService _userService;
     private readonly ICategoryService _categoryService;
     private readonly ITagService _tagService;
+    private readonly ILogger<PostService>? _logger;
 
     public PostService(IConfiguration configuration, IUserService userService, 
-        ICategoryService categoryService, ITagService tagService)
+        ICategoryService categoryService, ITagService tagService, ILogger<PostService>? logger = null)
     {
         _contentPath = configuration["ContentPath"] ?? Path.Combine(Directory.GetCurrentDirectory(), "content");
         _userService = userService;
         _categoryService = categoryService;
         _tagService = tagService;
+        _logger = logger;
+        
+        _logger?.LogInformation($"PostService initialized with ContentPath: {_contentPath}");
         EnsureDirectoryStructure();
     }
 
     private void EnsureDirectoryStructure()
     {
-        Directory.CreateDirectory(Path.Combine(_contentPath, "posts"));
-        Directory.CreateDirectory(Path.Combine(_contentPath, "users"));
-        Directory.CreateDirectory(Path.Combine(_contentPath, "categories"));
-        Directory.CreateDirectory(Path.Combine(_contentPath, "tags"));
+        try
+        {
+            var postsDir = Path.Combine(_contentPath, "posts");
+            var usersDir = Path.Combine(_contentPath, "users");
+            var categoriesDir = Path.Combine(_contentPath, "categories");
+            var tagsDir = Path.Combine(_contentPath, "tags");
+
+            Directory.CreateDirectory(postsDir);
+            Directory.CreateDirectory(usersDir);
+            Directory.CreateDirectory(categoriesDir);
+            Directory.CreateDirectory(tagsDir);
+
+            _logger?.LogInformation("Directory structure ensured successfully");
+            _logger?.LogInformation($"Posts directory: {postsDir} (exists: {Directory.Exists(postsDir)})");
+            _logger?.LogInformation($"Users directory: {usersDir} (exists: {Directory.Exists(usersDir)})");
+            _logger?.LogInformation($"Categories directory: {categoriesDir} (exists: {Directory.Exists(categoriesDir)})");
+            _logger?.LogInformation($"Tags directory: {tagsDir} (exists: {Directory.Exists(tagsDir)})");
+        }
+        catch (Exception ex)
+        {
+            _logger?.LogError(ex, "Failed to ensure directory structure");
+            throw;
+        }
     }
 
     public async Task<PagedResult<Post>> GetPostsAsync(int page, int pageSize)
     {
-        var postsDir = Path.Combine(_contentPath, "posts");
-        var allPosts = new List<Post>();
+        try
+        {
+            var postsDir = Path.Combine(_contentPath, "posts");
+            var allPosts = new List<Post>();
 
-        // First pass: Update scheduled posts that should be published
-        foreach (var postDir in Directory.GetDirectories(postsDir))
+            _logger?.LogInformation($"Attempting to read posts from: {postsDir}");
+
+            if (!Directory.Exists(postsDir))
+            {
+                _logger?.LogWarning($"Posts directory does not exist: {postsDir}");
+                return new PagedResult<Post>
+                {
+                    Items = new List<Post>(),
+                    TotalCount = 0,
+                    Page = page,
+                    PageSize = pageSize
+                };
+            }
+
+            var postDirectories = Directory.GetDirectories(postsDir);
+            _logger?.LogInformation($"Found {postDirectories.Length} post directories");
+
+            // First pass: Update scheduled posts that should be published
+            foreach (var postDir in postDirectories)
         {
             var metaPath = Path.Combine(postDir, "meta.json");
             if (File.Exists(metaPath))
@@ -56,7 +98,7 @@ public class PostService : IPostService
         }
 
         // Second pass: Load published posts
-        foreach (var postDir in Directory.GetDirectories(postsDir))
+        foreach (var postDir in postDirectories)
         {
             var metaPath = Path.Combine(postDir, "meta.json");
             if (File.Exists(metaPath))
@@ -75,6 +117,8 @@ public class PostService : IPostService
         var totalCount = sortedPosts.Count;
         var pagedPosts = sortedPosts.Skip((page - 1) * pageSize).Take(pageSize).ToList();
 
+        _logger?.LogInformation($"Returning {pagedPosts.Count} posts out of {totalCount} total");
+
         return new PagedResult<Post>
         {
             Items = pagedPosts,
@@ -82,6 +126,18 @@ public class PostService : IPostService
             Page = page,
             PageSize = pageSize
         };
+        }
+        catch (Exception ex)
+        {
+            _logger?.LogError(ex, "Error in GetPostsAsync");
+            return new PagedResult<Post>
+            {
+                Items = new List<Post>(),
+                TotalCount = 0,
+                Page = page,
+                PageSize = pageSize
+            };
+        }
     }
 
     public async Task<Post?> GetPostBySlugAsync(string slug)

@@ -14,9 +14,7 @@ jobs:
     runs-on: windows-latest
     permissions:
       contents: read #This is required for actions/checkout
-  defaults:
-    run:
-      working-directory: SkFileBlogSystem/SkFileBlogSystem
+
     steps:
       - uses: actions/checkout@v4
 
@@ -53,9 +51,9 @@ jobs:
       - name: Login to Azure
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_F4599A54452D4D58A6EB58298C137103 }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_B71AA3D5FD2E41A18192408BAA1F3E75 }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_0D1699F02A6E4ED1884C158FEE6204BE }}
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_5A8EA07CA37447EAA763F8CE8BBABAAA }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_59AA283D04F8404EA29DDEF7AD3795B2 }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_6224CFB728C24802BA02861F4CF62FE1 }}
 
       - name: Deploy to Azure Web App
         id: deploy-to-webapp

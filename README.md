@@ -2,6 +2,10 @@
 
 A modern, file-based blog system built with ASP.NET Core 10 Minimal API and a Next.js 14 frontend. This system is designed for robust content publishing, easy administration, and seamless media handling—all without a database.
 
+Frontend Deployed on Vercel
+
+Backend Deployed on Azure
+
 Link to Website: https://sk-file-blog-frontend.vercel.app
 
 ## Table of Contents

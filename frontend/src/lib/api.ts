@@ -43,6 +43,25 @@ export async function fetchRecentPosts(page: number = 1, pageSize: number = 10):
   return data;
 }
 
+export async function searchPosts(query: string, page: number = 1, pageSize: number = 10): Promise<BlogPostsResponse> {
+  if (!query.trim()) {
+    throw new Error('Search query is required');
+  }
+  
+  const response = await fetch(`${BASE_URL}/search?q=${encodeURIComponent(query)}&page=${page}&pageSize=${pageSize}`, {
+    headers: {
+      "ngrok-skip-browser-warning": "true", // Skip ngrok warning in development
+    }
+  });
+  
+  if (!response.ok) {
+    throw new Error('Failed to search posts');
+  }
+  
+  const data = await response.json();
+  return data;
+}
+
 export async function fetchTags(page: number = 1, pageSize: number = 10): Promise<TagsResponse> {
   const response = await fetch(`${BASE_URL}/tags?page=${page}&pageSize=${pageSize}`, {
     next: { 

@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Pagination } from '@/components/simple-pagination';
-import { fetchAllUsers, createUser, fetchRecentPosts, deletePost } from '@/lib/api';
+import { fetchAllUsers, createUser, fetchRecentPosts, deletePost, searchPosts } from '@/lib/api';
 import { invalidateAfterPostMutation, invalidateUsersCache } from '@/lib/cache-actions';
 import { useAdminDataRefresh, useDebounceDataLoader } from '@/lib/admin-hooks';
 import { getCurrentUserClient } from '@/lib/auth-client';
@@ -17,6 +17,7 @@ import { User, CreateUserRequest } from '@/types/auth';
 import { BlogPost } from '@/types/blog';
 import { Trash2, Users, FileText, UserPlus, Edit, Eye, Image as ImageIcon } from 'lucide-react';
 import AdminRoute from '@/components/admin-route';
+import { SearchBar } from '@/components/search-bar';
 
 function AdminPanelContent() {
   const [currentUser, setCurrentUser] = useState(getCurrentUserClient());
@@ -27,6 +28,7 @@ function AdminPanelContent() {
   const [activeTab, setActiveTab] = useState<'users' | 'posts' | 'media'>('users');
   const [userPage, setUserPage] = useState(1);
   const [postPage, setPostPage] = useState(1);
+  const [postSearchQuery, setPostSearchQuery] = useState('');
   const [totalUsers, setTotalUsers] = useState(0);
   const [totalPosts, setTotalPosts] = useState(0);
   const [showCreateUserDialog, setShowCreateUserDialog] = useState(false);
@@ -46,15 +48,28 @@ function AdminPanelContent() {
   }, []);
 
   const loadData = useCallback(async () => {
-    console.log('Admin: Loading data for tab:', activeTab, 'userPage:', userPage, 'postPage:', postPage);
+    console.log('Admin: Loading data for tab:', activeTab, 'userPage:', userPage, 'postPage:', postPage, 'postSearchQuery:', postSearchQuery);
     setLoading(true);
     setError(null);
     
     try {
+      // Determine which API call to make for posts
+      const getPostsPromise = () => {
+        if (activeTab === 'posts') {
+          if (postSearchQuery.trim()) {
+            return searchPosts(postSearchQuery, postPage, pageSize);
+          } else {
+            return fetchRecentPosts(postPage, pageSize);
+          }
+        } else {
+          return fetchRecentPosts(1, 1); // Just a minimal fetch when not on posts tab
+        }
+      };
+
       // Always load both counts for tab display, but only load full data for active tab
       const [usersResponse, postsResponse] = await Promise.allSettled([
         fetchAllUsers(activeTab === 'users' ? userPage : 1, activeTab === 'users' ? pageSize : 1),
-        fetchRecentPosts(activeTab === 'posts' ? postPage : 1, activeTab === 'posts' ? pageSize : 1)
+        getPostsPromise()
       ]);
 
       // Handle users response
@@ -90,7 +105,7 @@ function AdminPanelContent() {
     } finally {
       setLoading(false);
     }
-  }, [activeTab, userPage, postPage, pageSize]);
+  }, [activeTab, userPage, postPage, postSearchQuery, pageSize]);
 
   // Initial data load
   useEffect(() => {
@@ -141,6 +156,16 @@ function AdminPanelContent() {
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to delete post');
     }
+  };
+
+  const handlePostSearch = (query: string) => {
+    setPostSearchQuery(query);
+    setPostPage(1); // Reset to first page when searching
+  };
+
+  const clearPostSearch = () => {
+    setPostSearchQuery('');
+    setPostPage(1);
   };
 
   const userTotalPages = Math.ceil(totalUsers / pageSize);
@@ -358,11 +383,57 @@ function AdminPanelContent() {
       {activeTab === 'posts' && (
         <div>
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-xl font-semibold">Post Management</h2>
+            <h2 className="text-xl font-semibold">
+              Post Management
+              {postSearchQuery && (
+                <span className="text-base font-normal text-muted-foreground ml-2">
+                  - Search results for "{postSearchQuery}"
+                </span>
+              )}
+            </h2>
+          </div>
+
+          {/* Search Bar */}
+          <div className="mb-6 flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+            <div className="flex-1 max-w-md">
+              <SearchBar
+                onSearch={handlePostSearch}
+                placeholder="Search posts by title, content, or tags..."
+                className="w-full"
+                initialValue={postSearchQuery}
+              />
+            </div>
+            {postSearchQuery && (
+              <Button
+                variant="outline"
+                onClick={clearPostSearch}
+                className="whitespace-nowrap"
+              >
+                Clear Search
+              </Button>
+            )}
           </div>
 
           {loading ? (
             <div className="text-center py-8 text-muted-foreground">Loading posts...</div>
+          ) : posts && posts.length === 0 ? (
+            <div className="text-center py-12 bg-muted/30 rounded-lg">
+              <FileText className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+              <h3 className="text-lg font-medium mb-2">
+                {postSearchQuery ? 'No posts found' : 'No posts available'}
+              </h3>
+              <p className="text-muted-foreground mb-4">
+                {postSearchQuery 
+                  ? `No posts match your search for "${postSearchQuery}". Try different keywords.`
+                  : 'No blog posts have been created yet.'
+                }
+              </p>
+              {postSearchQuery && (
+                <Button variant="outline" onClick={clearPostSearch}>
+                  Clear search
+                </Button>
+              )}
+            </div>
           ) : (
             <>
               <Card>

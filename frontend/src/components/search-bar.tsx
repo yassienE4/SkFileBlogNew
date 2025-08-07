@@ -9,26 +9,37 @@ interface SearchBarProps {
   onSearch?: (query: string) => void;
   placeholder?: string;
   className?: string;
+  initialValue?: string;
 }
 
-export function SearchBar({ onSearch, placeholder = "Search posts...", className = "" }: SearchBarProps) {
+export function SearchBar({ onSearch, placeholder = "Search posts...", className = "", initialValue = "" }: SearchBarProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [searchQuery, setSearchQuery] = useState(searchParams.get('q') || '');
+  const [searchQuery, setSearchQuery] = useState(initialValue || searchParams.get('q') || '');
 
   useEffect(() => {
-    // Update search query if URL changes
-    setSearchQuery(searchParams.get('q') || '');
-  }, [searchParams]);
+    // Update search query if URL changes (only when not using onSearch callback)
+    if (!onSearch) {
+      setSearchQuery(searchParams.get('q') || '');
+    }
+  }, [searchParams, onSearch]);
+
+  useEffect(() => {
+    // Update search query if initialValue changes (for admin panel)
+    if (initialValue !== undefined) {
+      setSearchQuery(initialValue);
+    }
+  }, [initialValue]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const query = searchQuery.trim();
     
     if (onSearch) {
+      // Custom callback (for admin panel)
       onSearch(query);
     } else {
-      // Default behavior - navigate to blog with search query
+      // Default behavior - navigate to blog with search query (for blog page)
       if (query) {
         router.push(`/blog?q=${encodeURIComponent(query)}`);
       } else {
@@ -45,6 +56,15 @@ export function SearchBar({ onSearch, placeholder = "Search posts...", className
     if (e.key === 'Enter') {
       e.preventDefault();
       handleSubmit(e as any);
+    }
+  };
+
+  const handleClear = () => {
+    setSearchQuery('');
+    if (onSearch) {
+      onSearch('');
+    } else {
+      router.push('/blog');
     }
   };
 
@@ -65,10 +85,7 @@ export function SearchBar({ onSearch, placeholder = "Search posts...", className
             {searchQuery && (
               <button
                 type="button"
-                onClick={() => {
-                  setSearchQuery('');
-                  router.push('/blog');
-                }}
+                onClick={handleClear}
                 className="text-muted-foreground hover:text-foreground transition-colors text-sm px-2"
               >
                 Clear

@@ -42,7 +42,7 @@ jobs:
       - name: Build and push to Gitea Registry
         uses: docker/build-push-action@v6
         with:
-          context: skfileblognew/skfileblognew
+          context: ./SkFileBlogSystem/SkFileBlogSystem
           push: true
           platforms: linux/arm64
           tags: ${{ secrets.GITEA_REGISTRY }}/silverkeytech/skfileblognew/mariam:${{ steps.set_commit_id.outputs.commit_id}}

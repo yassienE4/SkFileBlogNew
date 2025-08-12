@@ -1,0 +1,12 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: skfileblognew
+  description: Dot Net app. Named skfileblognew
+  annotations:
+    github.com/project-slug: silverkeytech/skfileblognew
+    backstage.io/techdocs-ref: dir:.
+spec:
+  type: service
+  owner: development
+  lifecycle: experimental

@@ -1,4 +1,4 @@
 Hi this is a text file
 
-The app's name is: SkFileBlogNew
-The branch is : master
+The app's name is: skfileblognew
+The branch is : mariam2

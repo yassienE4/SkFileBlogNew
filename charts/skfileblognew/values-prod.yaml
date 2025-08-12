@@ -1,0 +1,10 @@
+replicaCount: 2
+image:
+  repository: registry.arc-center.run/silverkeytech/skfileblognew/mariam2
+  pullPolicy: IfNotPresent
+  tag: mariam2-skfileblognew-dev-latest
+
+resources:
+  requests:
+    cpu: 60m
+    memory: 60M

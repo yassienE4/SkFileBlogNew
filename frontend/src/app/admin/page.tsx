@@ -40,6 +40,15 @@ function AdminPanelContent() {
     role: 'Author',
   });
 
+  const renderHighlightedText = (text: string) => {
+    // If text contains <mark> tags, render as HTML (for search results)
+    if (text.includes('<mark>')) {
+      return <span dangerouslySetInnerHTML={{ __html: text }} />;
+    }
+    // Otherwise render as plain text
+    return text;
+  };
+
   const pageSize = 10;
 
   useEffect(() => {
@@ -453,8 +462,8 @@ function AdminPanelContent() {
                         {posts && posts.map((post) => (
                           <tr key={post.id}>
                             <td className="px-6 py-4">
-                              <div className="text-sm font-medium text-foreground">{post.title}</div>
-                              <div className="text-sm text-muted-foreground truncate max-w-xs">{post.description}</div>
+                              <div className="text-sm font-medium text-foreground">{renderHighlightedText(post.title)}</div>
+                              <div className="text-sm text-muted-foreground truncate max-w-xs">{renderHighlightedText(post.description)}</div>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">{post.authorName}</td>
                             <td className="px-6 py-4 whitespace-nowrap">

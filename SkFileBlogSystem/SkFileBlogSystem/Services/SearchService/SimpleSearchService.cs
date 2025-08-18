@@ -3,7 +3,7 @@ using SkFileBlogSystem.Models;
 
 namespace SkFileBlogSystem.Services;
 
-public class SearchService(IPostService postService) : ISearchService
+public class SimpleSearchService(IPostService postService) : ISearchService
 {
     public async Task<PagedResult<Post>> SearchPostsAsync(string query, int page, int pageSize)
     {
@@ -59,5 +59,40 @@ public class SearchService(IPostService postService) : ISearchService
             Page = page,
             PageSize = pageSize
         };
+    }
+
+    // Implement the new interface methods with simple implementations
+    public async Task IndexPostAsync(Post post)
+    {
+        // No-op for simple search service
+        await Task.CompletedTask;
+    }
+
+    public async Task RemovePostFromIndexAsync(string postId)
+    {
+        // No-op for simple search service
+        await Task.CompletedTask;
+    }
+
+    public async Task RebuildIndexAsync()
+    {
+        // No-op for simple search service
+        await Task.CompletedTask;
+    }
+
+    public async Task<List<string>> GetSuggestionsAsync(string query, int maxSuggestions = 5)
+    {
+        // Simple suggestions based on existing post titles
+        if (string.IsNullOrWhiteSpace(query))
+            return new List<string>();
+
+        var allPosts = await postService.GetPostsAsync(1, int.MaxValue);
+        var suggestions = allPosts.Items
+            .Where(p => p.Title.Contains(query, StringComparison.OrdinalIgnoreCase))
+            .Select(p => p.Title)
+            .Take(maxSuggestions)
+            .ToList();
+
+        return suggestions;
     }
 }

@@ -62,6 +62,26 @@ export async function searchPosts(query: string, page: number = 1, pageSize: num
   return data;
 }
 
+export async function getSearchSuggestions(query: string, maxSuggestions: number = 5): Promise<string[]> {
+  if (!query.trim()) {
+    return [];
+  }
+  
+  const response = await fetch(`${BASE_URL}/search/suggestions?q=${encodeURIComponent(query)}&maxSuggestions=${maxSuggestions}`, {
+    headers: {
+      "ngrok-skip-browser-warning": "true",
+    }
+  });
+  
+  if (!response.ok) {
+    console.warn('Failed to fetch search suggestions');
+    return [];
+  }
+  
+  const data = await response.json();
+  return Array.isArray(data) ? data : [];
+}
+
 export async function fetchTags(page: number = 1, pageSize: number = 10): Promise<TagsResponse> {
   const response = await fetch(`${BASE_URL}/tags?page=${page}&pageSize=${pageSize}`, {
     next: { 

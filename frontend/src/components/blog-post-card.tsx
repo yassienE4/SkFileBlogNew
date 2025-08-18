@@ -32,6 +32,15 @@ export function BlogPostCard({ post, showActions = false, currentUserId, onDelet
     return html.replace(/<[^>]*>/g, '');
   };
 
+  const renderHighlightedText = (text: string) => {
+    // If text contains <mark> tags, render as HTML (for search results)
+    if (text.includes('<mark>')) {
+      return <span dangerouslySetInnerHTML={{ __html: text }} />;
+    }
+    // Otherwise render as plain text
+    return text;
+  };
+
   const isOwner = currentUserId && post.authorId === currentUserId;
 
   return (
@@ -70,7 +79,7 @@ export function BlogPostCard({ post, showActions = false, currentUserId, onDelet
       <Link href={`/blog/${post.slug}`} className="block h-full">
         <CardHeader className="pb-3">
           <CardTitle className="text-xl font-semibold line-clamp-2 group-hover:text-primary transition-colors">
-            {post.title}
+            {renderHighlightedText(post.title)}
           </CardTitle>
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <time dateTime={post.modifiedDate}>
@@ -87,7 +96,7 @@ export function BlogPostCard({ post, showActions = false, currentUserId, onDelet
         <CardContent className="space-y-4">
           <div className="text-muted-foreground">
             {post.description ? (
-              <p>{truncateContent(post.description)}</p>
+              <p>{renderHighlightedText(post.description)}</p>
             ) : post.content ? (
               <p>{truncateContent(stripHtml(post.content))}</p>
             ) : (

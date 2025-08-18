@@ -49,6 +49,14 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 builder.Services.AddAuthorization();
 
 // Register services
+builder.Services.Configure<LuceneSearchOptions>(options =>
+{
+    options.IndexPath = builder.Configuration.GetValue<string>("Lucene:IndexPath") ?? "lucene_index";
+    options.MaxResults = builder.Configuration.GetValue<int>("Lucene:MaxResults", 1000);
+    options.EnableHighlighting = builder.Configuration.GetValue<bool>("Lucene:EnableHighlighting", true);
+    options.FragmentSize = builder.Configuration.GetValue<int>("Lucene:FragmentSize", 100);
+    options.MaxFragments = builder.Configuration.GetValue<int>("Lucene:MaxFragments", 3);
+});
 builder.Services.AddSingleton<IUserService, UserService>();
 builder.Services.AddSingleton<CategoryService>();
 builder.Services.AddSingleton<ICategoryService>(provider => provider.GetService<CategoryService>()!);
@@ -58,7 +66,7 @@ builder.Services.AddSingleton<IPostService, PostService>();
 builder.Services.AddSingleton<IMediaService, MediaService>();
 builder.Services.AddSingleton<IFeedService, FeedService>();
 builder.Services.AddSingleton<IAuthService, AuthService>();
-builder.Services.AddSingleton<ISearchService, SearchService>();
+builder.Services.AddSingleton<ISearchService, LuceneSearchService>();
 
 var app = builder.Build();
 
@@ -71,6 +79,25 @@ using (var scope = app.Services.CreateScope())
     
     categoryService.SetPostService(postService);
     tagService.SetPostService(postService);
+}
+
+// Initialize search index on startup
+using (var scope = app.Services.CreateScope())
+{
+    var searchService = scope.ServiceProvider.GetRequiredService<ISearchService>();
+    var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+    
+    try
+    {
+        logger.LogInformation("Initializing search index...");
+        await searchService.RebuildIndexAsync();
+        logger.LogInformation("Search index initialized successfully");
+    }
+    catch (Exception ex)
+    {
+        logger.LogError(ex, "Failed to initialize search index");
+        // Don't fail startup if search index initialization fails
+    }
 }
 
 if (app.Environment.IsDevelopment())
@@ -137,13 +164,29 @@ app.MapGet("/api/posts/{slug}", async (string slug, IPostService postService) =>
 })
 .WithName("GetPostBySlug");
 
-app.MapPost("/api/posts", async (CreatePostRequest request, IPostService postService, ClaimsPrincipal user) =>
+app.MapPost("/api/posts", async (CreatePostRequest request, IPostService postService, ISearchService searchService, ClaimsPrincipal user) =>
 {
     var authorId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
     if (string.IsNullOrEmpty(authorId))
         return Results.Unauthorized();
 
     var result = await postService.CreatePostAsync(request, authorId);
+    
+    if (result.IsSuccess && result.Data.Status == PostStatus.Published)
+    {
+        // Index the new post if it's published
+        try
+        {
+            await searchService.IndexPostAsync(result.Data);
+        }
+        catch (Exception ex)
+        {
+            // Log error but don't fail the request
+            var logger = app.Services.GetRequiredService<ILogger<Program>>();
+            logger.LogError(ex, "Failed to index new post: {PostId}", result.Data.Id);
+        }
+    }
+    
     return result.IsSuccess 
         ? Results.Created($"/api/posts/{result.Data.Slug}", result.Data) 
         : Results.BadRequest(result.ErrorMessage);
@@ -151,7 +194,7 @@ app.MapPost("/api/posts", async (CreatePostRequest request, IPostService postSer
 .RequireAuthorization()
 .WithName("CreatePost");
 
-app.MapPut("/api/posts/{slug}", async (string slug, UpdatePostRequest request, IPostService postService, ClaimsPrincipal user) =>
+app.MapPut("/api/posts/{slug}", async (string slug, UpdatePostRequest request, IPostService postService, ISearchService searchService, ClaimsPrincipal user) =>
 {
     var userId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
     var userRole = user.FindFirst(ClaimTypes.Role)?.Value;
@@ -164,12 +207,36 @@ app.MapPut("/api/posts/{slug}", async (string slug, UpdatePostRequest request, I
         return Results.Forbid();
 
     var result = await postService.UpdatePostAsync(slug, request);
+    
+    if (result.IsSuccess)
+    {
+        // Update the search index
+        try
+        {
+            if (result.Data.Status == PostStatus.Published)
+            {
+                await searchService.IndexPostAsync(result.Data);
+            }
+            else
+            {
+                // Remove from index if no longer published
+                await searchService.RemovePostFromIndexAsync(result.Data.Id);
+            }
+        }
+        catch (Exception ex)
+        {
+            // Log error but don't fail the request
+            var logger = app.Services.GetRequiredService<ILogger<Program>>();
+            logger.LogError(ex, "Failed to update post index: {PostId}", result.Data.Id);
+        }
+    }
+    
     return result.IsSuccess ? Results.Ok(result.Data) : Results.BadRequest(result.ErrorMessage);
 })
 .RequireAuthorization()
 .WithName("UpdatePost");
 
-app.MapDelete("/api/posts/{slug}", async (string slug, IPostService postService, ClaimsPrincipal user) =>
+app.MapDelete("/api/posts/{slug}", async (string slug, IPostService postService, ISearchService searchService, ClaimsPrincipal user) =>
 {
     var userId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
     var userRole = user.FindFirst(ClaimTypes.Role)?.Value;
@@ -182,6 +249,22 @@ app.MapDelete("/api/posts/{slug}", async (string slug, IPostService postService,
         return Results.Forbid();
 
     var result = await postService.DeletePostAsync(slug);
+    
+    if (result.IsSuccess)
+    {
+        // Remove from search index
+        try
+        {
+            await searchService.RemovePostFromIndexAsync(existingPost.Id);
+        }
+        catch (Exception ex)
+        {
+            // Log error but don't fail the request
+            var logger = app.Services.GetRequiredService<ILogger<Program>>();
+            logger.LogError(ex, "Failed to remove post from index: {PostId}", existingPost.Id);
+        }
+    }
+    
     return result.IsSuccess ? Results.NoContent() : Results.BadRequest(result.ErrorMessage);
 })
 .RequireAuthorization()
@@ -233,6 +316,38 @@ app.MapGet("/api/search", async (string q, int page, int pageSize, ISearchServic
     return Results.Ok(results);
 })
 .WithName("SearchPosts");
+
+// Search suggestions endpoint
+app.MapGet("/api/search/suggestions", async (string q, int maxSuggestions, ISearchService searchService) =>
+{
+    if (string.IsNullOrWhiteSpace(q))
+        return Results.BadRequest("Query is required");
+
+    maxSuggestions = Math.Clamp(maxSuggestions, 1, 10);
+    var suggestions = await searchService.GetSuggestionsAsync(q, maxSuggestions);
+    return Results.Ok(suggestions);
+})
+.WithName("GetSearchSuggestions");
+
+// Admin endpoint to rebuild search index
+app.MapPost("/api/admin/search/rebuild", async (ISearchService searchService, ClaimsPrincipal user) =>
+{
+    var userRole = user.FindFirst(ClaimTypes.Role)?.Value;
+    if (userRole != "Admin")
+        return Results.Forbid();
+
+    try
+    {
+        await searchService.RebuildIndexAsync();
+        return Results.Ok(new { message = "Search index rebuilt successfully" });
+    }
+    catch (Exception ex)
+    {
+        return Results.Problem($"Failed to rebuild search index: {ex.Message}");
+    }
+})
+.WithName("RebuildSearchIndex")
+.RequireAuthorization();
 
 // Media endpoints
 app.MapPost("/api/media/upload", async (IFormFile file, IMediaService mediaService, ClaimsPrincipal user) =>

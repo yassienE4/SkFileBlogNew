@@ -1,5 +1,6 @@
 SkFileBlogSystem/SkFileBlogSystem/bin/
 SkFileBlogSystem/SkFileBlogSystem/obj/
+SkFileBlogSystem/SkFileBlogSystem/lucene_index*/
 SkFileBlogSystem/packages/
 SkFileBlogSystem/riderModule.iml
 SkFileBlogSystem/_ReSharper.Caches/

@@ -2,7 +2,7 @@ replicaCount: 2
 image:
   repository: registry.arc-center.run/silverkeytech/skfileblognew
   pullPolicy: IfNotPresent
-  tag: skfileblognew-prod-latest
+  tag: skfileblognew-dev-latest
 
 resources:
   requests:

@@ -42,7 +42,7 @@ jobs:
       - name: Build and push to Gitea Registry
         uses: docker/build-push-action@v6
         with:
-          context: SkFileBlogSystem/SkFileBlogSystem/Dockerfile
+          context: ./SkFileBlogSystem/SkFileBlogSystem/Dockerfile
           push: true
           platforms: linux/arm64
           tags: ${{ secrets.GITEA_REGISTRY }}/silverkeytech/skfileblognew/master:${{ steps.set_commit_id.outputs.commit_id}}
@@ -63,13 +63,13 @@ jobs:
           yq -i -y '
            .image.repository = "registry.arc-center.run/silverkeytech/skfileblognew/master" |
            .image.tag = "${{ needs.ci.outputs.commit_id }}"
-           ' charts/skfileblognew/values-prod.yaml
+           ' charts/skfileblognew/values-dev.yaml
 
       - name: Commit and push changes manually
         run: |
           git config user.name "MariamElkamhawySK"
           git config user.email "MariamElkamhawySK@users.noreply.github.com"
-          git add charts/skfileblognew/values-prod.yaml
+          git add charts/skfileblognew/values-dev.yaml
           git commit -m "Updates values.yaml with commit ${{ needs.ci.outputs.commit_id }}" || echo "No changes to commit"
           git pull origin master --rebase
           git push origin HEAD:master
@@ -101,9 +101,9 @@ jobs:
           argocd app create "$app_name" \
             --repo "$repo" \
             --path charts/skfileblognew \
-            --dest-namespace prod \
+            --dest-namespace dev \
             --dest-server https://kubernetes.default.svc \
-            --values values-prod.yaml \
+            --values values-dev.yaml \
             --revision  master \
             --sync-policy manual \
             --sync-option CreateNamespace=true || true

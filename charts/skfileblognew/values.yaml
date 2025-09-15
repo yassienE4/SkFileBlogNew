@@ -4,7 +4,7 @@ replicaCount: 1
 image:
   repository: registry.arc-center.run/silverkeytech/skfileblognew/master
   pullPolicy: IfNotPresent
-  tag: master-skfileblognew-prod-latest
+  tag: master-skfileblognew-dev-latest
 
 imagePullSecrets: 
    - name: gitea-registry-secret
@@ -34,14 +34,14 @@ ingress:
   annotations:
     cert-manager.io/cluster-issuer: "clusterissuer-arc-center-domain"
   hosts:
-    - host: skfileblognew-master-prod.arc-center.run
+    - host: skfileblognew-master-dev.arc-center.run
       paths:
         - path: /
           pathType: Prefix
   tls:
     - hosts:
-        - skfileblognew-master-prod.arc-center.run
-      secretName: skfileblognew-master-prod-tls
+        - skfileblognew-master-dev.arc-center.run
+      secretName: skfileblognew-master-dev-tls
 
 resources:
   requests:
@@ -64,4 +64,4 @@ tolerations: []
 affinity: {}
 envFrom:
   - secretRef:
-      name: skfileblognew-master-prod
+      name: skfileblognew-master-dev

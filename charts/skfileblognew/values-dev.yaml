@@ -1,5 +1,5 @@
 replicaCount: 1
 image:
-  repository: registry.arc-center.run/silverkeytech/skfileblognew
+  repository: registry.arc-center.run/silverkeytech/skfileblognew/yassienblog
   pullPolicy: IfNotPresent
-  tag: skfileblognew-dev-latest
+  tag: 4a8e80
